@@ -1,0 +1,1 @@
+class Request(var method: String = "", var contentType: String = "", var body: String = "")
