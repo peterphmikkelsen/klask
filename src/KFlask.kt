@@ -57,10 +57,7 @@ class KFlask {
                     request.body = requestData.last()
 
                 request.method = method
-
-                val contentType = requestData.getContentType
-                if (contentType != "")
-                    request.contentType = contentType
+                request.contentType = requestData.getContentType
 
                 // Sending back response
                 val allowedMethods = httpExchange.allowedMethods
@@ -87,9 +84,8 @@ class KFlask {
         get() {
             this.forEach {
                 val result = """Content-Length: (.*)""".toRegex().find(it)
-                if (result != null) {
+                if (result != null)
                     return result.groups[1]?.value?.toInt() ?: 0
-                }
             }
             return 0
     }
