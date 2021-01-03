@@ -1,3 +1,6 @@
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+@ExperimentalCoroutinesApi
 fun main() {
     val app = KFlask()
     app.route("/") { _, res ->

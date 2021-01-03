@@ -1,3 +1,4 @@
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.InetSocketAddress
@@ -5,6 +6,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import kotlin.system.exitProcess
 
+@ExperimentalCoroutinesApi
 class KFlask {
 
     private val server = ServerSocket()
@@ -12,66 +14,70 @@ class KFlask {
 
     fun run(host: String = "127.0.0.1", port: Int = 8080) {
         server.bind(InetSocketAddress(host, port), 0)
-        while (true) {
-            try {
-                val clientSocket = server.accept()
-                println("Client connected!")
-                val reader = clientSocket.getInputStream().bufferedReader()
-                val requestData = mutableListOf<String>()
+        runBlocking {
+            while (true) {
+                try {
+                    withContext(Dispatchers.IO) {
+                        val clientSocket = server.accept()
+                        println("Client connected! " + this.coroutineContext)
+                        val reader = clientSocket.getInputStream().bufferedReader()
+                        val requestData = mutableListOf<String>()
 
-                var line = reader.readLine()
-                while (line != "") {
-                    requestData.add(line)
-                    line = reader.readLine()
+                        var line = reader.readLine()
+                        while (line != "") {
+                            requestData.add(line)
+                            line = reader.readLine()
+                        }
+
+                        // In order to read the request body:
+                        // First finding the Content-Length header
+                        val contentLength = requestData.getContentLength
+
+                        // Reading the request body
+                        val sb = StringBuilder()
+                        repeat(contentLength) { sb.append(reader.read().toChar()) }
+                        requestData.add(sb.toString())
+
+                        // Handling weird error when doing cURL request. The content is not usually read in the first loop of
+                        // the request, but when doing a cURL, it - for some reason - is
+                        if (requestData.last() == "")
+                            requestData.removeAt(requestData.lastIndex)
+
+                        // Start processing the request
+                        val (method, URI, _) = requestData[0].split(" ")
+                        val httpExchange = routeMappings[URI]
+
+                        // Route is not defined
+                        if (httpExchange == null) {
+                            clientSocket.sendNotFoundError()
+                            return@withContext
+                        }
+
+                        val request = httpExchange.request
+                        val response = httpExchange.response
+
+                        // Handling data for the request object
+                        if ((method == "POST" || method == "PUT") && contentLength != 0)
+                            request.body = requestData.last()
+
+                        request.method = method
+                        request.contentType = requestData.getContentType
+
+                        // Sending back response
+                        val allowedMethods = httpExchange.allowedMethods
+                        if (method !in allowedMethods)
+                            clientSocket.sendMethodNotAllowedError(allowedMethods)
+                        else {
+                            httpExchange.handler(request, response)
+                            clientSocket.sendResponse(response.body)
+                        }
+                    }
+
+                } catch (e: IOException) {
+                    println("Error serving the client:")
+                    println(e)
+                    exitProcess(1)
                 }
-
-                // In order to read the request body:
-                // First finding the Content-Length header
-                val contentLength = requestData.getContentLength
-
-                // Reading the request body
-                val sb = StringBuilder()
-                repeat(contentLength) { sb.append(reader.read().toChar()) }
-                requestData.add(sb.toString())
-
-                // Handling weird error when doing cURL request. The content is not usually read in the first loop of
-                // the request, but when doing a cURL, it - for some reason - is
-                if (requestData.last() == "")
-                    requestData.removeAt(requestData.lastIndex)
-
-                // Start processing the request
-                val (method, URI, _) = requestData[0].split(" ")
-                val httpExchange = routeMappings[URI]
-
-                // Route is not defined
-                if (httpExchange == null) {
-                    clientSocket.sendNotFoundError()
-                    continue
-                }
-
-                val request = httpExchange.request
-                val response = httpExchange.response
-
-                // Handling data for the request object
-                if (method == "POST" || method == "PUT")
-                    request.body = requestData.last()
-
-                request.method = method
-                request.contentType = requestData.getContentType
-
-                // Sending back response
-                val allowedMethods = httpExchange.allowedMethods
-                if (method !in allowedMethods)
-                    clientSocket.sendMethodNotAllowedError(allowedMethods)
-                else {
-                    httpExchange.handler(request, response)
-                    clientSocket.sendResponse(response.body)
-                }
-
-            } catch (e: IOException) {
-                println("Error serving the client:")
-                println(e)
-                exitProcess(1)
             }
         }
     }
