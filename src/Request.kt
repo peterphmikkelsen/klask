@@ -1,1 +1,1 @@
-class Request(var method: String = "", var contentType: String = "", var body: String = "")
+class Request(var method: String = "", var contentType: String = "", var body: String = "", var params: MutableMap<String, String> = mutableMapOf())

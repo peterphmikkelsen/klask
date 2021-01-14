@@ -12,9 +12,13 @@ fun main() {
         res.makeResponse("""{"hello":"world!"}""", "application/json")
     }
 
-    app.route("/test", methods = listOf("POST")) { req, res ->
+    app.route("/testpost", methods = listOf("POST")) { req, res ->
         println(req.body)
         res.makeResponse("home=Cosby&favorite+flavor=flies", "application/x-www-form-urlencoded")
+    }
+
+    app.route("/testparams/<idx1>/<idx2>") { req, res ->
+        res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", "text/html")
     }
 
     app.run()

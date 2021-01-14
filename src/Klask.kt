@@ -33,18 +33,17 @@ class Klask {
                 val sb = StringBuilder()
                 repeat(contentLength) { sb.append(reader.read().toChar()) }
                 requestData.add(sb.toString())
-                println(requestData)
 
                 // Handling weird error when doing cURL request. The content is not usually read in the first loop of
                 // the request, but when doing a cURL, it - for some reason - is
                 if (requestData.last() == "")
-                    requestData.removeAt(requestData.lastIndex)
+                    requestData.removeLast()
 
                 if (requestData.isEmpty()) continue
 
                 // Start processing the request
                 val (method, URI, _) = requestData[0].split(" ")
-                val httpExchange = routeMappings[URI]
+                val httpExchange = routeMappings.getExchange(URI)
 
                 // Route is not defined
                 if (httpExchange == null) {
@@ -62,15 +61,12 @@ class Klask {
                 request.method = method
                 request.contentType = requestData.getContentType
 
-                println(httpExchange)
-
                 // Sending back response
                 val allowedMethods = httpExchange.allowedMethods
                 if (method !in allowedMethods)
                     clientSocket.sendMethodNotAllowedError(allowedMethods)
                 else {
                     httpExchange.handler(request, response)
-                    println(response.body)
                     clientSocket.sendResponse(response.body)
                 }
 
@@ -89,7 +85,7 @@ class Klask {
     private val List<String>.getContentLength: Int
         get() {
             this.forEach {
-                val result = """Content-Length: (.*)""".toRegex().find(it)
+                val result = "Content-Length: (.*)".toRegex().find(it)
                 if (result != null)
                     return result.groups[1]?.value?.toInt() ?: 0
             }
@@ -99,11 +95,42 @@ class Klask {
     private val List<String>.getContentType: String
         get() {
             this.forEach {
-                val result = """Content-Type: (.*)""".toRegex().find(it)
+                val result = "Content-Type: (.*)".toRegex().find(it)
                 if (result != null)
                     return result.groups[1]?.value ?: ""
             }
             return ""
+    }
+
+    // Adds URL parameters too the request object (if they are there) and returns the HttpExchange object found
+    private fun MutableMap<String, HttpExchange>.getExchange(route: String): HttpExchange? {
+        // If the route has en exact match (e.g. no parameters) just return it
+        val exchange = this[route]
+        if (exchange != null)
+            return exchange
+
+        val paramValues = route.split("/")
+        for ((k, v) in this) {
+            // Don't consider the root URL
+            if (k == "/") continue
+
+            // Make sure we actually match the correct route
+            if (!(k.replace("""<.+>""".toRegex(), ".*").toRegex().matches(route)))
+                return null
+
+            // Add the parameters to the request object.
+            val paramKeys = k.split("/")
+            for (i in paramKeys.indices) {
+                // Ensure only the real parameters (e.g. <...>) are added to the request object
+                if (paramKeys[i] == "" || !(paramKeys[i][0] == '<' && paramKeys[i].last() == '>'))
+                    continue
+
+                val formattedKey = paramKeys[i].replace("[<\$>]".toRegex(), "") // Get rid of the < >
+                v.request.params[formattedKey] = paramValues[i]
+            }
+            return v
+        }
+        return null
     }
 
     // *************************** Returning Responses ***************************
