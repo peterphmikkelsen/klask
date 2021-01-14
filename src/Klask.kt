@@ -40,6 +40,8 @@ class Klask {
                 if (requestData.last() == "")
                     requestData.removeAt(requestData.lastIndex)
 
+                if (requestData.isEmpty()) continue
+
                 // Start processing the request
                 val (method, URI, _) = requestData[0].split(" ")
                 val httpExchange = routeMappings[URI]
