@@ -104,7 +104,7 @@ class Klask {
 
     // Adds URL parameters too the request object (if they are there) and returns the HttpExchange object found
     private fun MutableMap<String, HttpExchange>.getExchange(route: String): HttpExchange? {
-        // If the route has en exact match (e.g. no parameters) just return it
+        // If the route has an exact match (e.g. no parameters) just return it
         val exchange = this[route]
         if (exchange != null)
             return exchange
@@ -145,7 +145,10 @@ class Klask {
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
         val writer = PrintWriter(this.getOutputStream())
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 405 Method Not Allowed\n").append("Allow: ").append(allowed.joinToString(", ")).append("\r\n")
+        sb.append("HTTP/1.1 405 Method Not Allowed\n")
+            .append("Allow: ")
+            .append(allowed.joinToString(", "))
+            .append("\r\n")
         writer.println(sb.toString())
         writer.flush()
         writer.close()
@@ -153,7 +156,7 @@ class Klask {
 
     private fun Socket.sendNotFoundError() {
         val writer = PrintWriter(this.getOutputStream())
-        writer.println("HTTP/1.1 404 Not Found\r\n")
+        writer.println("HTTP/1.1 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
         writer.flush()
         writer.close()
     }

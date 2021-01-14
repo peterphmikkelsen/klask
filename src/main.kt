@@ -1,5 +1,6 @@
 fun main() {
     val app = Klask()
+
     app.route("/") { _, res ->
         res.renderTemplate("index.html")
     }
@@ -14,7 +15,7 @@ fun main() {
 
     app.route("/testpost", methods = listOf("POST")) { req, res ->
         println(req.body)
-        res.makeResponse("home=Cosby&favorite+flavor=flies", "application/x-www-form-urlencoded")
+        res.makeResponse("username=peter&favorite+color=blue", "application/x-www-form-urlencoded")
     }
 
     app.route("/testparams/<idx1>/<idx2>") { req, res ->
