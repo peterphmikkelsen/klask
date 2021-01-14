@@ -1,8 +1,5 @@
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-
-@ExperimentalCoroutinesApi
 fun main() {
-    val app = KFlask()
+    val app = Klask()
     app.route("/") { _, res ->
         res.renderTemplate("index.html")
     }
