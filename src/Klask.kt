@@ -10,7 +10,7 @@ class Klask {
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
 
-    fun run(host: String = "127.0.0.1", port: Int = 8080) {
+    fun run(host: String = "127.0.0.1", port: Int = 80) {
         server.bind(InetSocketAddress(host, port), 0)
         while (true) {
             try {
