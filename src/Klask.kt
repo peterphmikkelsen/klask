@@ -115,7 +115,7 @@ class Klask {
             if (k == "/") continue
 
             // Make sure we actually match the correct route
-            if (!(k.replace("""<.+>""".toRegex(), ".*").toRegex().matches(route)))
+            if (!(k.replace("<.+>".toRegex(), ".*").toRegex().matches(route)))
                 return null
 
             // Add the parameters to the request object.
