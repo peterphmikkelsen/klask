@@ -1,3 +1,4 @@
+import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
 import java.net.InetSocketAddress
@@ -45,9 +46,16 @@ class Klask {
                 val (method, URI, _) = requestData[0].split(" ")
                 val httpExchange = routeMappings.getExchange(URI)
 
-                // Route is not defined
+                println("Incoming $method request at $URI")
+
+                // Route is not defined - check static files
                 if (httpExchange == null) {
-                    clientSocket.sendNotFoundError()
+                    val staticFile = File("src/static/${URI.replace("/", "")}")
+                    if (!staticFile.exists()) {
+                        clientSocket.sendNotFoundError()
+                        continue
+                    }
+                    clientSocket.sendStaticFile(staticFile)
                     continue
                 }
 
@@ -118,7 +126,7 @@ class Klask {
             if (!(k.replace("<.+>".toRegex(), ".*").toRegex().matches(route)))
                 return null
 
-            // Add the parameters to the request object.
+            // Add the parameters to the request object
             val paramKeys = k.split("/")
             for (i in paramKeys.indices) {
                 // Ensure only the real parameters (e.g. <...>) are added to the request object
@@ -140,6 +148,27 @@ class Klask {
         writer.println(response)
         writer.flush()
         writer.close()
+    }
+
+    private fun Socket.sendStaticFile(file: File) {
+        val writer = PrintWriter(this.getOutputStream())
+        val reader = file.bufferedReader()
+        val sb = StringBuilder()
+        sb.append("HTTP/1.1 200 OK\n")
+        if (file.extension == "css")
+            sb.append("Content-Type: text/css; charset=utf-8\n")
+        else if (file.extension == "js")
+            sb.append("Content-Type: application/javascript\n")
+        sb.append("Content-Length: ${file.length()}\r\n\n")
+        var line = reader.readLine()
+        while (line != null) {
+            sb.append("$line\n")
+            line = reader.readLine()
+        }
+        writer.println(sb.toString())
+        writer.flush()
+        writer.close()
+        reader.close()
     }
 
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
