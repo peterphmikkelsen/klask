@@ -51,7 +51,7 @@ class Klask {
 
                 // Route is not defined - check static files
                 if (httpExchange == null) {
-                    val staticFile = File("src/static/${URI.replace("/", "")}")
+                    val staticFile = File("test/static/${URI.replace("/", "")}")  // TODO: Fix hardcoded path
                     if (!staticFile.exists()) {
                         clientSocket.sendNotFoundError()
                         continue

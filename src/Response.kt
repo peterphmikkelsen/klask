@@ -3,7 +3,7 @@ import java.io.File
 class Response(var body: String = "", var contentType: String = "") {
 
     fun renderTemplate(fileName: String): Response {
-        val file = File("src/templates/$fileName")
+        val file = File("test/templates/$fileName") // TODO: Fix hardcoded path
         val reader = file.bufferedReader()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 200 OK\n")
