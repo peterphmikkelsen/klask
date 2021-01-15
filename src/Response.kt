@@ -21,14 +21,14 @@ class Response(var body: String = "", var contentType: String = "") {
         return this
     }
 
-    fun makeResponse(response: String, contentType: String): Response {
+    fun makeResponse(response: String, contentType: Content): Response {
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 200 OK\n").append("Content-Type: $contentType; charset=utf-8\n").append("Content-Length: ${response.length}")
-        if (contentType == "application/json")
+        sb.append("HTTP/1.1 200 OK\n").append("Content-Type: ${contentType.desc}; charset=utf-8\n").append("Content-Length: ${response.length}")
+        if (contentType.desc == "application/json")
             sb.append("\nAccept: application/json")
         sb.append("\r\n\n$response")
 
-        this.contentType = contentType
+        this.contentType = contentType.desc
         this.body = sb.toString()
         return this
     }
