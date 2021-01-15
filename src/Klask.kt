@@ -88,6 +88,8 @@ class Klask {
     }
 
     fun route(route: String, methods: List<String> = listOf("GET", "POST"), endpointHandler: (Request, Response) -> Unit) {
+        if (routeMappings[route] != null)
+            throw DuplicateRouteException("Routes must be unique: $route is already defined.")
         routeMappings[route] = HttpExchange(Request(), Response(), methods, endpointHandler)
     }
 
@@ -111,7 +113,7 @@ class Klask {
             return ""
     }
 
-    // Adds URL parameters too the request object (if they are there) and returns the HttpExchange object found
+    // Adds URL parameters to the request object (if they are there) and returns the HttpExchange object found
     private fun MutableMap<String, HttpExchange>.getExchange(route: String): HttpExchange? {
         // If the route has an exact match (e.g. no parameters) just return it
         val exchange = this[route]

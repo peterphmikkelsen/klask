@@ -9,6 +9,11 @@ fun main() {
         res.makeResponse("Hello World!", Content.PLAIN)
     }
 
+    // Throws custom DuplicateRouteException
+    /*app.route("/plain") { _, res ->
+        res.makeResponse("Hello World!", Content.PLAIN)
+    }*/
+
     app.route("/json") { _, res ->
         res.makeResponse("""{"hello":"world!"}""", Content.JSON)
     }
@@ -17,7 +22,7 @@ fun main() {
         res.makeResponse("""
             <?xml version="1.0" encoding="UTF-8"?>
             <root>
-               <ele>hello world!</ele>
+                <ele>hello world!</ele>
             </root>
         """.trimIndent(), Content.XML)
     }
