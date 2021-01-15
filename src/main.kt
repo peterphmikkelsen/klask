@@ -6,7 +6,6 @@ fun main() {
     }
 
     app.route("/plain") { _, res ->
-        println(Content.PLAIN)
         res.makeResponse("Hello World!", Content.PLAIN)
     }
 

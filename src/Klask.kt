@@ -44,9 +44,10 @@ class Klask {
 
                 // Start processing the request
                 val (method, URI, _) = requestData[0].split(" ")
-                val httpExchange = routeMappings.getExchange(URI)
 
                 println("Incoming $method request at $URI")
+
+                val httpExchange = routeMappings.getExchange(URI)
 
                 // Route is not defined - check static files
                 if (httpExchange == null) {
@@ -123,8 +124,8 @@ class Klask {
             if (k == "/") continue
 
             // Make sure we actually match the correct route
-            if (!(k.replace("<.+>".toRegex(), ".*").toRegex().matches(route)))
-                return null
+            if (!(k.replace("<.+>".toRegex(), ".+").toRegex().matches(route)))
+                continue
 
             // Add the parameters to the request object
             val paramKeys = k.split("/")
