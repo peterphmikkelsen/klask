@@ -192,4 +192,6 @@ class Klask {
         writer.flush()
         writer.close()
     }
+
+    private class DuplicateRouteException(msg: String): Exception(msg)
 }
