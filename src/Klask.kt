@@ -19,7 +19,7 @@ class Klask {
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
         while (true) {
             try {
-                val clientSocket = server.accept()
+                val clientSocket = server.accept() // TODO: Make asynchronous - using coroutines
                 println("Client connected!")
                 val reader = clientSocket.getInputStream().bufferedReader()
                 val requestData = mutableListOf<String>()
@@ -183,10 +183,7 @@ class Klask {
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
         val writer = PrintWriter(this.getOutputStream())
         val sb = StringBuilder()
-        sb.append("HTTP/2 405 Method Not Allowed\n")
-            .append("Allow: ")
-            .append(allowed.joinToString(", "))
-            .append("\r\n")
+        sb.append("HTTP/2 405 Method Not Allowed\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
         writer.println(sb.toString())
         writer.flush()
         writer.close()

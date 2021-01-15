@@ -5,6 +5,7 @@ import java.util.*
 class Response(var body: String = "", var contentType: String = "") {
 
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
+
     init {
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
     }
@@ -45,5 +46,4 @@ class Response(var body: String = "", var contentType: String = "") {
         this.body = sb.toString()
         return this
     }
-
 }
