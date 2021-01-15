@@ -4,6 +4,7 @@ import java.util.*
 
 class Response(var body: String = "", var contentType: String = "") {
 
+    private val responseCodes = mapOf(200 to "200 OK", 404 to "404 Not Found", 405 to "405 Method Not Allowed") // TODO: All codes should be available
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
 
     init {
@@ -31,9 +32,9 @@ class Response(var body: String = "", var contentType: String = "") {
         return this
     }
 
-    fun makeResponse(response: String, contentType: Content): Response {
+    fun makeResponse(response: String, contentType: Content, responseCode: Int = 200): Response {
         val sb = StringBuilder()
-        sb.append("HTTP/2 200 OK\n")
+        sb.append("HTTP/2 ${responseCodes[responseCode]}\n")
             .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")
