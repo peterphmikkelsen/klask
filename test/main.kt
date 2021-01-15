@@ -27,8 +27,8 @@ fun main() {
         """.trimIndent(), Content.XML)
     }
 
-    app.route("/urlenc", methods = listOf("POST")) { _, res ->
-        res.makeResponse("username=peter&favorite+color=blue", Content.URLEncoded)
+    app.route("/urlenc") { _, res ->
+        res.makeResponse("username=peter&favorite%color=blue", Content.URLEncoded)
     }
 
     app.route("/testpost", methods = listOf("POST")) { req, res ->
