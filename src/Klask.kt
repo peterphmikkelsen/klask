@@ -4,15 +4,19 @@ import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.system.exitProcess
 
 class Klask {
 
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
+    private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
 
     fun run(host: String = "127.0.0.1", port: Int = 80) {
         server.bind(InetSocketAddress(host, port), 0)
+        dateFormat.timeZone = TimeZone.getTimeZone("GMT")
         while (true) {
             try {
                 val clientSocket = server.accept()
@@ -76,6 +80,7 @@ class Klask {
                     clientSocket.sendMethodNotAllowedError(allowedMethods)
                 else {
                     httpExchange.handler(request, response)
+                    println("Sending back response!")
                     clientSocket.sendResponse(response.body)
                 }
 
@@ -157,12 +162,13 @@ class Klask {
         val writer = PrintWriter(this.getOutputStream())
         val reader = file.bufferedReader()
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 200 OK\n")
+        sb.append("HTTP/2 200 OK\n")
         if (file.extension == "css")
             sb.append("Content-Type: text/css; charset=utf-8\n")
         else if (file.extension == "js")
             sb.append("Content-Type: application/javascript\n")
-        sb.append("Content-Length: ${file.length()}\r\n\n")
+        sb.append("Connection: keep-alive\n").append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
+
         var line = reader.readLine()
         while (line != null) {
             sb.append("$line\n")
@@ -177,7 +183,7 @@ class Klask {
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
         val writer = PrintWriter(this.getOutputStream())
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 405 Method Not Allowed\n")
+        sb.append("HTTP/2 405 Method Not Allowed\n")
             .append("Allow: ")
             .append(allowed.joinToString(", "))
             .append("\r\n")
@@ -188,7 +194,7 @@ class Klask {
 
     private fun Socket.sendNotFoundError() {
         val writer = PrintWriter(this.getOutputStream())
-        writer.println("HTTP/1.1 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
+        writer.println("HTTP/2 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
         writer.flush()
         writer.close()
     }
