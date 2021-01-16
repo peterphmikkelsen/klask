@@ -19,7 +19,7 @@ class Response(private var contentType: String = "", private var responseCode: I
         val file = File("test/templates/$fileName") // TODO: Fix hardcoded path
         val reader = file.bufferedReader()
         val sb = StringBuilder()
-        sb.append("HTTP/2 200 OK\n")
+        sb.append("HTTP/1.1 200 OK\n")
             .append("Content-Type: text/html; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
@@ -39,7 +39,7 @@ class Response(private var contentType: String = "", private var responseCode: I
 
     fun makeResponse(response: String, contentType: Content, responseCode: Int = 200): Response {
         val sb = StringBuilder()
-        sb.append("HTTP/2 ${responseCodes[responseCode]}\n")
+        sb.append("HTTP/1.1 ${responseCodes[responseCode]}\n")
             .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")

@@ -157,7 +157,7 @@ class Klask {
         val writer = PrintWriter(this.getOutputStream())
         val reader = file.bufferedReader()
         val sb = StringBuilder()
-        sb.append("HTTP/2 200 OK\n")
+        sb.append("HTTP/1.1 200 OK\n")
         if (file.extension == "css")
             sb.append("Content-Type: text/css; charset=utf-8\n")
         else if (file.extension == "js")
@@ -178,7 +178,7 @@ class Klask {
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
         val writer = PrintWriter(this.getOutputStream())
         val sb = StringBuilder()
-        sb.append("HTTP/2 405 Method Not Allowed\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
+        sb.append("HTTP/1.1 405 Method Not Allowed\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
         writer.println(sb.toString())
         writer.flush()
         writer.close()
@@ -186,7 +186,7 @@ class Klask {
 
     private fun Socket.sendNotFoundError() {
         val writer = PrintWriter(this.getOutputStream())
-        writer.println("HTTP/2 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
+        writer.println("HTTP/1.1 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
         writer.flush()
         writer.close()
     }
