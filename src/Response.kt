@@ -2,7 +2,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Response(var body: String = "", var contentType: String = "") {
+class Response(var body: String = "", var contentType: String = "", var responseCode: Int = -1) {
 
     private val responseCodes = mapOf(200 to "200 OK", 404 to "404 Not Found", 405 to "405 Method Not Allowed") // TODO: All codes should be available
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
@@ -28,6 +28,7 @@ class Response(var body: String = "", var contentType: String = "") {
         reader.close()
 
         this.contentType = "text/html"
+        this.responseCode = 200
         this.body = sb.toString()
         return this
     }
@@ -44,6 +45,7 @@ class Response(var body: String = "", var contentType: String = "") {
         sb.append("\r\n\n$response")
 
         this.contentType = contentType.desc
+        this.responseCode = responseCode
         this.body = sb.toString()
         return this
     }
