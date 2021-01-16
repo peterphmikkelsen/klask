@@ -46,5 +46,6 @@ fun main() {
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
 
+    // The server will run with host=localhost and port=80 if no other parameters are given
     app.run()
 }

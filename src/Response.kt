@@ -2,11 +2,15 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Response(var body: String = "", var contentType: String = "", var responseCode: Int = -1) {
+class Response(private var contentType: String = "", private var responseCode: Int = -1) {
+
+    // Making the getter of body public but setter private
+    lateinit var body: String
+        private set
 
     private val responseCodes = mapOf(200 to "200 OK", 404 to "404 Not Found", 405 to "405 Method Not Allowed") // TODO: All codes should be available
-    private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
 
+    private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
     init {
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
     }
