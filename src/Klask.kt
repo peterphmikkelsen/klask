@@ -20,7 +20,6 @@ class Klask {
         while (true) {
             try {
                 val clientSocket = server.accept() // TODO: Make asynchronous - using coroutines
-                println("Client connected!")
                 val reader = clientSocket.getInputStream().bufferedReader()
                 val requestData = mutableListOf<String>()
 
@@ -48,9 +47,6 @@ class Klask {
 
                 // Start processing the request
                 val (method, URI, _) = requestData[0].split(" ")
-
-                println("Incoming $method request at $URI")
-
                 val httpExchange = routeMappings.getExchange(URI)
 
                 // Route is not defined - check static files
@@ -80,7 +76,6 @@ class Klask {
                     clientSocket.sendMethodNotAllowedError(allowedMethods)
                 else {
                     httpExchange.handler(request, response)
-                    println("Sending back response!")
                     clientSocket.sendResponse(response.body)
                 }
 
