@@ -43,10 +43,9 @@ class Response(private var contentType: String = "", private var responseCode: I
             .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")
-            .append("Content-Length: ${response.length}")
-        if (contentType.desc == "application/json")
-            sb.append("\nAccept: application/json")
-        sb.append("\r\n\n$response")
+            .append("Content-Length: ${response.length}\n")
+            .append(if (contentType.desc == "application/json") "Accept: application/json\n" else "")
+            .append("\r\n$response")
 
         this.contentType = contentType.desc
         this.responseCode = responseCode
