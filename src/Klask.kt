@@ -1,3 +1,5 @@
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
@@ -9,7 +11,6 @@ import java.util.*
 import kotlin.system.exitProcess
 
 class Klask {
-
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
@@ -19,66 +20,10 @@ class Klask {
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
         while (true) {
             try {
-                val clientSocket = server.accept() // TODO: Make asynchronous - using coroutines
-                val reader = clientSocket.getInputStream().bufferedReader()
-                val requestData = mutableListOf<String>()
-
-                var line = reader.readLine()
-                while (line != "" && line != null) {
-                    requestData.add(line)
-                    line = reader.readLine()
+                val clientSocket = server.accept()
+                GlobalScope.launch {
+                    handleIncomingClient(clientSocket)
                 }
-
-                // In order to read the request body:
-                // First finding the Content-Length header
-                val contentLength = requestData.getContentLength
-
-                // Reading the request body
-                val sb = StringBuilder()
-                repeat(contentLength) { sb.append(reader.read().toChar()) }
-                requestData.add(sb.toString())
-
-                // Handling weird error when doing cURL request. The content is not usually read in the first loop of
-                // the request, but when doing a cURL, it - for some reason - is
-                if (requestData.last() == "")
-                    requestData.removeLast()
-
-                if (requestData.isEmpty()) continue
-
-                // Start processing the request
-                val (method, URI, _) = requestData[0].split(" ")
-                val httpExchange = routeMappings.getExchange(URI)
-
-                // Route is not defined - check static files
-                if (httpExchange == null) {
-                    val staticFile = File("test/static/${URI.replace("/", "")}")  // TODO: Fix hardcoded path
-                    if (!staticFile.exists()) {
-                        clientSocket.sendNotFoundError()
-                        continue
-                    }
-                    clientSocket.sendStaticFile(staticFile)
-                    continue
-                }
-
-                val request = httpExchange.request
-                val response = httpExchange.response
-
-                // Handling data for the request object
-                if ((method == "POST" || method == "PUT") && contentLength != 0)
-                    request.body = requestData.last()
-
-                request.method = method
-                request.contentType = requestData.getContentType
-
-                // Sending back response
-                val allowedMethods = httpExchange.allowedMethods
-                if (method !in allowedMethods)
-                    clientSocket.sendMethodNotAllowedError(allowedMethods)
-                else {
-                    httpExchange.handler(request, response)
-                    clientSocket.sendResponse(response.body)
-                }
-
             } catch (e: IOException) {
                 println("Error serving the client:")
                 println(e)
@@ -91,6 +36,67 @@ class Klask {
         if (routeMappings[route] != null)
             throw DuplicateRouteException("Routes must be unique: $route is already defined.")
         routeMappings[route] = HttpExchange(Request(), Response(), methods, endpointHandler)
+    }
+
+    private fun handleIncomingClient(clientSocket: Socket) {
+        val reader = clientSocket.getInputStream().bufferedReader()
+        val requestData = mutableListOf<String>()
+
+        var line = reader.readLine()
+        while (line != "" && line != null) {
+            requestData.add(line)
+            line = reader.readLine()
+        }
+
+        // In order to read the request body:
+        // First finding the Content-Length header
+        val contentLength = requestData.getContentLength
+
+        // Reading the request body
+        val sb = StringBuilder()
+        repeat(contentLength) { sb.append(reader.read().toChar()) }
+        requestData.add(sb.toString())
+
+        // Handling weird error when doing cURL request. The content is not usually read in the first loop of
+        // the request, but when doing a cURL, it - for some reason - is
+        if (requestData.last() == "")
+            requestData.removeLast()
+
+        if (requestData.isEmpty()) return
+
+        // Start processing the request
+        val (method, URI, _) = requestData[0].split(" ")
+        val httpExchange = routeMappings.getExchange(URI)
+
+        // Route is not defined - check static files
+        if (httpExchange == null) {
+            val staticFile = File("test/static/${URI.replace("/", "")}")  // TODO: Fix hardcoded path
+            if (!staticFile.exists()) {
+                clientSocket.sendNotFoundError()
+                return
+            }
+            clientSocket.sendStaticFile(staticFile)
+            return
+        }
+
+        val request = httpExchange.request
+        val response = httpExchange.response
+
+        // Handling data for the request object
+        if ((method == "POST" || method == "PUT") && contentLength != 0)
+            request.body = requestData.last()
+
+        request.method = method
+        request.contentType = requestData.getContentType
+
+        // Sending back response
+        val allowedMethods = httpExchange.allowedMethods
+        if (method !in allowedMethods)
+            clientSocket.sendMethodNotAllowedError(allowedMethods)
+        else {
+            httpExchange.handler(request, response)
+            clientSocket.sendResponse(response.body)
+        }
     }
 
     private val List<String>.getContentLength: Int
@@ -147,14 +153,13 @@ class Klask {
     // *************************** Returning Responses ***************************
 
     private fun Socket.sendResponse(response: String) {
-        val writer = PrintWriter(this.getOutputStream())
+        val writer = PrintWriter(this.getOutputStream(), true)
         writer.println(response)
-        writer.flush()
         writer.close()
     }
 
     private fun Socket.sendStaticFile(file: File) {
-        val writer = PrintWriter(this.getOutputStream())
+        val writer = PrintWriter(this.getOutputStream(), true)
         val reader = file.bufferedReader()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 200 OK\n")
@@ -170,24 +175,21 @@ class Klask {
             line = reader.readLine()
         }
         writer.println(sb.toString())
-        writer.flush()
         writer.close()
         reader.close()
     }
 
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
-        val writer = PrintWriter(this.getOutputStream())
+        val writer = PrintWriter(this.getOutputStream(), true)
         val sb = StringBuilder()
         sb.append("HTTP/1.1 405 Method Not Allowed\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
         writer.println(sb.toString())
-        writer.flush()
         writer.close()
     }
 
     private fun Socket.sendNotFoundError() {
-        val writer = PrintWriter(this.getOutputStream())
+        val writer = PrintWriter(this.getOutputStream(), true)
         writer.println("HTTP/1.1 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
-        writer.flush()
         writer.close()
     }
 
