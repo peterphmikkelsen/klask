@@ -29,7 +29,7 @@ app.route("/") { req, res ->
 }
 
 app.route("/plain") { req, res ->
-    res.makeResponse("Hello World!", Content.PLAIN)
+    res.makeResponse("Hello World!", Content.PLAIN, Status.HTTP_200_OK) // Explicitly defining the response code
 }
 
 app.route("/json") { _, res ->
