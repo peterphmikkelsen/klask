@@ -2,13 +2,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Response(private var contentType: String = "", private var responseCode: Int = -1) {
+class Response(private var contentType: String = "", private var responseCode: Status = Status.NONE) {
 
     // Making the getter of body public but setter private
     lateinit var body: String
         private set
-
-    private val responseCodes = mapOf(200 to "200 OK", 404 to "404 Not Found", 405 to "405 Method Not Allowed") // TODO: All codes should be available
 
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
     init {
@@ -19,7 +17,7 @@ class Response(private var contentType: String = "", private var responseCode: I
         val file = File("test/templates/$fileName") // TODO: Fix hardcoded path
         val reader = file.bufferedReader()
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 200 OK\n")
+        sb.append("HTTP/1.1 ${Status.HTTP_200_OK.desc}\n")
             .append("Content-Type: text/html; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
@@ -32,14 +30,14 @@ class Response(private var contentType: String = "", private var responseCode: I
         reader.close()
 
         this.contentType = "text/html"
-        this.responseCode = 200
+        this.responseCode = Status.HTTP_200_OK
         this.body = sb.toString()
         return this
     }
 
-    fun makeResponse(response: String, contentType: Content, responseCode: Int = 200): Response {
+    fun makeResponse(response: String, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 ${responseCodes[responseCode]}\n")
+        sb.append("HTTP/1.1 ${responseCode.desc}\n")
             .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")

@@ -17,7 +17,9 @@ class Klask {
 
     fun run(host: String = "127.0.0.1", port: Int = 80) {
         server.bind(InetSocketAddress(host, port), 0)
+        // Used for correct response header
         dateFormat.timeZone = TimeZone.getTimeZone("GMT")
+
         while (true) {
             try {
                 val clientSocket = server.accept()
@@ -70,7 +72,7 @@ class Klask {
 
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("test/static/${URI.replace("/", "")}")  // TODO: Fix hardcoded path
+            val staticFile = File("test/static/${URI.replace("/", "")}")
             if (!staticFile.exists()) {
                 clientSocket.sendNotFoundError()
                 return
@@ -121,8 +123,9 @@ class Klask {
 
     // Adds URL parameters to the request object (if they are there) and returns the HttpExchange object found
     private fun MutableMap<String, HttpExchange>.getExchange(route: String): HttpExchange? {
-        // If the route has an exact match (e.g. no parameters) just return it
         val exchange = this[route]
+
+        // If the route has an exact match (e.g. no parameters) just return it
         if (exchange != null)
             return exchange
 
@@ -162,7 +165,7 @@ class Klask {
         val writer = PrintWriter(this.getOutputStream(), true)
         val reader = file.bufferedReader()
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 200 OK\n")
+        sb.append("HTTP/1.1 ${Status.HTTP_200_OK.desc}\n")
         if (file.extension == "css")
             sb.append("Content-Type: text/css; charset=utf-8\n")
         else if (file.extension == "js")
@@ -182,14 +185,14 @@ class Klask {
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
         val writer = PrintWriter(this.getOutputStream(), true)
         val sb = StringBuilder()
-        sb.append("HTTP/1.1 405 Method Not Allowed\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
+        sb.append("HTTP/1.1 ${Status.HTTP_405_METHOD_NOT_ALLOWED.desc}\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
         writer.println(sb.toString())
         writer.close()
     }
 
     private fun Socket.sendNotFoundError() {
         val writer = PrintWriter(this.getOutputStream(), true)
-        writer.println("HTTP/1.1 404 Not Found\n\n<h1>404 Not Found</h1>\r\n")
+        writer.println("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
         writer.close()
     }
 
