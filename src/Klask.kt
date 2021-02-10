@@ -14,12 +14,6 @@ class Klask {
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
 
-    // Used for correct response date header
-    private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
-    init {
-        dateFormat.timeZone = TimeZone.getTimeZone("GMT")
-    }
-
     fun run(host: String = "127.0.0.1", port: Int = 80) {
         server.bind(InetSocketAddress(host, port), 0)
 
@@ -165,24 +159,8 @@ class Klask {
     }
 
     private fun Socket.sendStaticFile(file: File) {
-        val writer = PrintWriter(this.getOutputStream(), true)
-        val reader = file.bufferedReader()
-        val sb = StringBuilder()
-        sb.append("HTTP/1.1 ${Status.HTTP_200_OK.desc}\n")
-        if (file.extension == "css")
-            sb.append("Content-Type: text/css; charset=utf-8\n")
-        else if (file.extension == "js")
-            sb.append("Content-Type: application/javascript\n")
-        sb.append("Connection: keep-alive\n").append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
-
-        var line = reader.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = reader.readLine()
-        }
-        writer.println(sb.toString())
-        writer.close()
-        reader.close()
+        val content = if (file.extension == "css") Content.CSS else Content.JAVASCRIPT // TODO: Handle more types of static files (e.g. images)
+        this.sendResponse(Response().sendFile(file, content).body)
     }
 
     private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {

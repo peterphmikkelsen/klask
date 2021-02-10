@@ -3,5 +3,7 @@ enum class Content(val desc: String) {
     XML("application/xml"),
     PLAIN("text/plain"),
     JSON("application/json"),
-    URLEncoded("application/x-www-form-urlencoded")
+    URLEncoded("application/x-www-form-urlencoded"),
+    JAVASCRIPT("application/javascript"),
+    CSS("text/css; charset=utf-8"),
 }
