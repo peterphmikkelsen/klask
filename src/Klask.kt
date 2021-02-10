@@ -13,15 +13,13 @@ import kotlin.system.exitProcess
 class Klask {
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
-
-    // Used for correct response header
     private val dateFormat = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss")
-    init {
-        dateFormat.timeZone = TimeZone.getTimeZone("GMT")
-    }
 
     fun run(host: String = "127.0.0.1", port: Int = 80) {
         server.bind(InetSocketAddress(host, port), 0)
+        // Used for correct response header
+        dateFormat.timeZone = TimeZone.getTimeZone("GMT")
+
         while (true) {
             try {
                 val clientSocket = server.accept()
