@@ -57,7 +57,7 @@ class Response(private var contentType: String = "", private var responseCode: S
         val reader = file.bufferedReader()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
-            .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
+            .append("Content-Type: ${contentType.desc}\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
 

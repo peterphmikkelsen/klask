@@ -1,5 +1,6 @@
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.PrintWriter
@@ -153,13 +154,19 @@ class Klask {
     // *************************** Returning Responses ***************************
 
     private fun Socket.sendResponse(response: String) {
-        val writer = PrintWriter(this.getOutputStream(), true)
-        writer.println(response)
+        val writer = DataOutputStream(this.getOutputStream())
+        writer.writeBytes(response)
         writer.close()
     }
 
     private fun Socket.sendStaticFile(file: File) {
-        val content = if (file.extension == "css") Content.CSS else Content.JAVASCRIPT // TODO: Handle more types of static files (e.g. images)
+        val content = when (file.extension) {
+            "js" -> Content.JAVASCRIPT
+            "css" -> Content.CSS
+//            "ico" -> Content.ICON // TODO: Figure out how to send binary data
+//            "png" -> Content.PNG
+            else -> Content.NONE
+        }
         this.sendResponse(Response().sendFile(file, content).body)
     }
 
@@ -167,13 +174,13 @@ class Klask {
         val writer = PrintWriter(this.getOutputStream(), true)
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${Status.HTTP_405_METHOD_NOT_ALLOWED.desc}\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
-        writer.println(sb.toString())
+        writer.write(sb.toString())
         writer.close()
     }
 
     private fun Socket.sendNotFoundError() {
         val writer = PrintWriter(this.getOutputStream(), true)
-        writer.println("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
+        writer.write("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
         writer.close()
     }
 
