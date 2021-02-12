@@ -1,3 +1,5 @@
+import java.io.File
+
 fun main() {
     val app = Klask()
 
@@ -44,6 +46,10 @@ fun main() {
     app.route("/testparams/<idx1>/<idx2>") { req, res ->
         println("Client connected at /testparams/${req.params["idx1"]}/${req.params["idx2"]}")
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
+    }
+
+    app.route("/testfile") { _, response ->
+        response.sendFile(File("test/static/myicon.ico"), Content.ICON)
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given

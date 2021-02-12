@@ -2,7 +2,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Response(private var contentType: String = "", private var responseCode: Status = Status.NONE) {
+class Response(private var contentType: Content = Content.NONE, private var responseCode: Status = Status.NONE) {
 
     // Making the getter of body public but setter private
     lateinit var body: String
@@ -15,26 +15,9 @@ class Response(private var contentType: String = "", private var responseCode: S
 
     fun renderTemplate(fileName: String): Response {
         val file = File("test/templates/$fileName") // TODO: Fix hardcoded path
-        if (file.extension != "html") throw IllegalArgumentException("Only HTML files are allowed.")
+        if (file.extension != "html") throw IllegalArgumentException("Only HTML files are allowed. Use \"sendFile\" for sending arbitrary files.")
 
-        val reader = file.bufferedReader()
-        val sb = StringBuilder()
-        sb.append("HTTP/1.1 ${Status.HTTP_200_OK.desc}\n")
-            .append("Content-Type: text/html; charset=utf-8\n")
-            .append("Connection: keep-alive\n")
-            .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
-
-        var line = reader.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = reader.readLine()
-        }
-        reader.close()
-
-        this.contentType = "text/html"
-        this.responseCode = Status.HTTP_200_OK
-        this.body = sb.toString()
-        return this
+        return sendFile(file, Content.HTML)
     }
 
     fun makeResponse(response: String, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
@@ -47,28 +30,28 @@ class Response(private var contentType: String = "", private var responseCode: S
             .append(if (contentType.desc == "application/json") "Accept: application/json\n" else "")
             .append("\r\n$response")
 
-        this.contentType = contentType.desc
+        this.contentType = contentType
         this.responseCode = responseCode
         this.body = sb.toString()
         return this
     }
 
     fun sendFile(file: File, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
-        val reader = file.bufferedReader()
+        val reader = file.inputStream().buffered()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
             .append("Content-Type: ${contentType.desc}\n")
             .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
 
-        var line = reader.readLine()
-        while (line != null) {
-            sb.append("$line\n")
-            line = reader.readLine()
+        var line = reader.read()
+        while (line != -1) {
+            sb.append(line.toChar())
+            line = reader.read()
         }
         reader.close()
 
-        this.contentType = contentType.desc
+        this.contentType = contentType
         this.responseCode = responseCode
         this.body = sb.toString()
         return this

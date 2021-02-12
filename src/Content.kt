@@ -7,7 +7,7 @@ enum class Content(val desc: String) {
     URLEncoded("application/x-www-form-urlencoded"),
     JAVASCRIPT("application/javascript; charset=utf-8"),
     CSS("text/css; charset=utf-8"),
-//    PNG("image/png"),
-//    JPEG("image/jpeg"),
-//    ICON("image/x-icon"),
+    PNG("image/png"),
+    JPEG("image/jpeg"),
+    ICON("image/x-icon"),
 }

@@ -70,7 +70,7 @@ class Klask {
 
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("test/static/${URI.replace("/", "")}")
+            val staticFile = File("test/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
                 clientSocket.sendNotFoundError()
                 return
@@ -160,11 +160,12 @@ class Klask {
     }
 
     private fun Socket.sendStaticFile(file: File) {
-        val content = when (file.extension) {
+        val content = when (file.extension) { // TODO: Handling more static file types
             "js" -> Content.JAVASCRIPT
             "css" -> Content.CSS
-//            "ico" -> Content.ICON // TODO: Figure out how to send binary data
-//            "png" -> Content.PNG
+            "ico" -> Content.ICON
+            "png" -> Content.PNG
+            "txt" -> Content.PLAIN
             else -> Content.NONE
         }
         this.sendResponse(Response().sendFile(file, content).body)
