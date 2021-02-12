@@ -53,5 +53,9 @@ app.route("/testpost", methods = listOf("POST")) { req, res ->
 app.route("/testparams/<idx1>/<idx2>") { req, res ->
     res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
 }
+
+app.route("/testfile") { _, res ->
+    res.sendFile(File("myroot/mydir/myfile.txt"), Content.PLAIN)
+}
 ```
 
