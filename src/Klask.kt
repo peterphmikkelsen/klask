@@ -109,14 +109,20 @@ class Klask {
             return 0
     }
 
-    private val List<String>.getContentType: String
+    private val List<String>.getContentType: Content
         get() {
             this.forEach {
                 val result = "Content-Type: (.*)".toRegex().find(it)
                 if (result != null)
-                    return result.groups[1]?.value ?: ""
+                    return result.groups[1]?.value?.toContentType() ?: Content.NONE
             }
-            return ""
+            return Content.NONE
+    }
+
+    private fun String.toContentType(): Content {
+        for (contentType in Content.values())
+            if (contentType.desc == this) return contentType
+        return Content.NONE
     }
 
     // Adds URL parameters to the request object (if they are there) and returns the HttpExchange object found
