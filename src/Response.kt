@@ -23,10 +23,10 @@ class Response(private var contentType: Content = Content.NONE, private var resp
     fun makeResponse(response: String, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
-            .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
+            .append("Content-Type: ${contentType.desc}; charset=UTF-8\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")
             .append("Content-Length: ${response.length}\n")
-            .append(if (contentType.desc == "application/json") "Accept: application/json\n" else "")
+            .append(if (contentType == Content.JSON) "Accept: ${Content.JSON.desc}\n" else "")
 
         for ((k, v) in headers)
             sb.append("$k: $v\n")

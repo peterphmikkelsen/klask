@@ -40,6 +40,7 @@ class Klask {
 
     private fun handleIncomingClient(clientSocket: Socket) {
         val reader = clientSocket.getInputStream().bufferedReader()
+        val writer = DataOutputStream(clientSocket.getOutputStream())
         val requestData = mutableListOf<String>()
 
         var line = reader.readLine()
@@ -72,10 +73,12 @@ class Klask {
         if (httpExchange == null) {
             val staticFile = File("test/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
-                clientSocket.sendNotFoundError()
+                writer.sendNotFoundError()
+                writer.close()
                 return
             }
-            clientSocket.sendStaticFile(staticFile)
+            writer.sendStaticFile(staticFile)
+            writer.close()
             return
         }
 
@@ -92,11 +95,12 @@ class Klask {
         // Sending back response
         val allowedMethods = httpExchange.allowedMethods
         if (method !in allowedMethods)
-            clientSocket.sendMethodNotAllowedError(allowedMethods)
+            writer.sendMethodNotAllowedError(allowedMethods)
         else {
             httpExchange.handler(request, response)
-            clientSocket.sendResponse(response.body)
+            writer.sendResponse(response.body)
         }
+        writer.close()
     }
 
     private val List<String>.getContentLength: Int
@@ -159,13 +163,9 @@ class Klask {
 
     // *************************** Returning Responses ***************************
 
-    private fun Socket.sendResponse(response: String) {
-        val writer = DataOutputStream(this.getOutputStream())
-        writer.writeBytes(response)
-        writer.close()
-    }
+    private fun DataOutputStream.sendResponse(response: String) = this.writeBytes(response)
 
-    private fun Socket.sendStaticFile(file: File) {
+    private fun DataOutputStream.sendStaticFile(file: File) {
         val content = when (file.extension) { // TODO: Handling more static file types
             "js" -> Content.JAVASCRIPT
             "css" -> Content.CSS
@@ -178,19 +178,14 @@ class Klask {
         this.sendResponse(Response().sendFile(file, content).body)
     }
 
-    private fun Socket.sendMethodNotAllowedError(allowed: List<String>) {
-        val writer = PrintWriter(this.getOutputStream(), true)
+    private fun DataOutputStream.sendMethodNotAllowedError(allowed: List<String>) {
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${Status.HTTP_405_METHOD_NOT_ALLOWED.desc}\n").append("Allow: ${allowed.joinToString(", ")}\r\n")
-        writer.write(sb.toString())
-        writer.close()
+        this.sendResponse(sb.toString())
     }
 
-    private fun Socket.sendNotFoundError() {
-        val writer = PrintWriter(this.getOutputStream(), true)
-        writer.write("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
-        writer.close()
-    }
+    private fun DataOutputStream.sendNotFoundError() =
+        this.sendResponse("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
 
     private class DuplicateRouteException(msg: String): Exception(msg)
 }
