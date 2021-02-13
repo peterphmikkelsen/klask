@@ -172,6 +172,7 @@ class Klask {
             "ico" -> Content.ICON
             "png" -> Content.PNG
             "txt" -> Content.PLAIN
+            "json" -> Content.JSON
             else -> Content.NONE
         }
         this.sendResponse(Response().sendFile(file, content).body)
