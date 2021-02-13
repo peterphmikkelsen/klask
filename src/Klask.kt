@@ -3,12 +3,9 @@ import kotlinx.coroutines.launch
 import java.io.DataOutputStream
 import java.io.File
 import java.io.IOException
-import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.system.exitProcess
 
 class Klask {
@@ -73,12 +70,10 @@ class Klask {
         if (httpExchange == null) {
             val staticFile = File("test/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
-                writer.sendNotFoundError()
-                writer.close()
+                writer.sendNotFoundError(); writer.close()
                 return
             }
-            writer.sendStaticFile(staticFile)
-            writer.close()
+            writer.sendStaticFile(staticFile); writer.close()
             return
         }
 
@@ -100,6 +95,7 @@ class Klask {
             httpExchange.handler(request, response)
             writer.sendResponse(response.body)
         }
+
         writer.close()
     }
 
@@ -173,7 +169,7 @@ class Klask {
             "png" -> Content.PNG
             "txt" -> Content.PLAIN
             "json" -> Content.JSON
-            else -> Content.NONE
+            else -> throw IllegalArgumentException("File type is not allowed: ${file.extension}")
         }
         this.sendResponse(Response().sendFile(file, content).body)
     }
