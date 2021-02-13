@@ -2,7 +2,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-class Response(private var contentType: Content = Content.NONE, private var responseCode: Status = Status.NONE) {
+class Response(private var contentType: Content = Content.NONE, private var responseCode: Status = Status.NONE, var headers: MutableMap<String, String> = mutableMapOf()) {
 
     // Making the getter of body public but setter private
     lateinit var body: String
@@ -24,11 +24,14 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
             .append("Content-Type: ${contentType.desc}; charset=utf-8\n")
-            .append("Connection: keep-alive\n")
             .append("Date: ${dateFormat.format(Date())} GMT\n")
             .append("Content-Length: ${response.length}\n")
             .append(if (contentType.desc == "application/json") "Accept: application/json\n" else "")
-            .append("\r\n$response")
+
+        for ((k, v) in headers)
+            sb.append("$k: $v\n")
+
+        sb.append("\r\n$response")
 
         this.contentType = contentType
         this.responseCode = responseCode
@@ -41,8 +44,12 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
             .append("Content-Type: ${contentType.desc}\n")
-            .append("Connection: keep-alive\n")
-            .append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
+            .append("Content-Length: ${file.length()}\n")
+
+        for ((k, v) in headers)
+            sb.append("$k: $v\n")
+
+        sb.append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
 
         var line = reader.read()
         while (line != -1) {

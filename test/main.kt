@@ -10,6 +10,7 @@ fun main() {
 
     app.route("/plain") { _, res ->
         println("Client connected at /plain")
+        res.headers["Access-Control-Allow-Origin"] = "*"
         res.makeResponse("Hello World!", Content.PLAIN)
     }
 
