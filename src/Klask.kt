@@ -133,6 +133,19 @@ class Klask {
         if (exchange != null)
             return exchange
 
+        // Handle potential URL query string
+        return if ("?" !in route) {
+            this.handleURLParameter(route)
+        } else {
+            val (baseURL, queryString) = route.split("?")
+            val currentExchange = this.handleURLParameter(baseURL)
+            for (query in queryString.split("&"))
+                currentExchange?.request?.args?.set(query.substringBefore("="), query.substringAfter("=")) ?: return null
+            currentExchange
+        }
+    }
+
+    private fun MutableMap<String, HttpExchange>.handleURLParameter(route: String): HttpExchange? {
         val paramValues = route.split("/")
         for ((k, v) in this) {
             // Don't consider the root URL
@@ -155,6 +168,17 @@ class Klask {
             return v
         }
         return null
+    }
+
+    private fun HttpExchange.handleURLQueries(route: String): HttpExchange {
+        if ("?" in route) {
+            val (_, query) = route.split("?")
+            val queryParameters = query.split("&")
+            for (param in queryParameters)
+                this.request.args[param.substringBefore("=")] = param.substringAfter("=")
+        }
+        println(this)
+        return this
     }
 
     // *************************** Returning Responses ***************************

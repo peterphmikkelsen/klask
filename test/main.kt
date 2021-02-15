@@ -46,6 +46,7 @@ fun main() {
 
     app.route("/testparams/<idx1>/<idx2>") { req, res ->
         println("Client connected at /testparams/${req.params["idx1"]}/${req.params["idx2"]}")
+        println(req.args)
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
 
