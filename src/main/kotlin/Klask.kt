@@ -68,7 +68,7 @@ class Klask {
 
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("test/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
+            val staticFile = File("src/test/kotlin/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
                 writer.sendNotFoundError(); writer.close()
                 return
@@ -168,17 +168,6 @@ class Klask {
             return v
         }
         return null
-    }
-
-    private fun HttpExchange.handleURLQueries(route: String): HttpExchange {
-        if ("?" in route) {
-            val (_, query) = route.split("?")
-            val queryParameters = query.split("&")
-            for (param in queryParameters)
-                this.request.args[param.substringBefore("=")] = param.substringAfter("=")
-        }
-        println(this)
-        return this
     }
 
     // *************************** Returning Responses ***************************
