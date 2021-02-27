@@ -52,8 +52,6 @@ class Klask {
         // First finding the Content-Length header
         val contentLength = requestData.getContentLength
 
-        println(contentLength)
-
         // Reading the request body
         val sb = StringBuilder()
         repeat(contentLength) { sb.append(reader.read().toChar()) }
@@ -66,14 +64,10 @@ class Klask {
 
         if (requestData.isEmpty()) return
 
-        println(requestData)
-
         // Start processing the request
         val request = parser.parse(requestData)
         val httpExchange = routeMappings.getExchange(request.url)
-
-        println(request.body)
-
+        
         // Route is not defined - check static files
         if (httpExchange == null) {
             val staticFile = File("src/test/kotlin/static/${request.url.replace("/", "")}") // TODO: Fix hardcoded path
