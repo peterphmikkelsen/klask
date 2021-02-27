@@ -38,6 +38,8 @@ class Klask {
     private fun handleIncomingClient(clientSocket: Socket) {
         val reader = clientSocket.getInputStream().bufferedReader()
         val writer = DataOutputStream(clientSocket.getOutputStream())
+
+        val parser = RequestParser()
         val requestData = mutableListOf<String>()
 
         var line = reader.readLine()
@@ -49,6 +51,8 @@ class Klask {
         // In order to read the request body:
         // First finding the Content-Length header
         val contentLength = requestData.getContentLength
+
+        println(contentLength)
 
         // Reading the request body
         val sb = StringBuilder()
@@ -62,13 +66,17 @@ class Klask {
 
         if (requestData.isEmpty()) return
 
+        println(requestData)
+
         // Start processing the request
-        val (method, URI, _) = requestData[0].split(" ")
-        val httpExchange = routeMappings.getExchange(URI)
+        val request = parser.parse(requestData)
+        val httpExchange = routeMappings.getExchange(request.url)
+
+        println(request.body)
 
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("src/test/kotlin/static/${URI.replace("/", "")}") // TODO: Fix hardcoded path
+            val staticFile = File("src/test/kotlin/static/${request.url.replace("/", "")}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
                 writer.sendNotFoundError(); writer.close()
                 return
@@ -77,19 +85,12 @@ class Klask {
             return
         }
 
-        val request = httpExchange.request
+        httpExchange.request = request
         val response = httpExchange.response
-
-        // Handling data for the request object
-        if ((method == "POST" || method == "PUT") && contentLength != 0)
-            request.body = requestData.last()
-
-        request.method = method
-        request.contentType = requestData.getContentType
 
         // Sending back response
         val allowedMethods = httpExchange.allowedMethods
-        if (method !in allowedMethods)
+        if (request.method !in allowedMethods)
             writer.sendMethodNotAllowedError(allowedMethods)
         else {
             httpExchange.handler(request, response)
@@ -109,15 +110,15 @@ class Klask {
             return 0
     }
 
-    private val List<String>.getContentType: Content
-        get() {
-            this.forEach {
-                val result = "Content-Type: (.*)".toRegex().find(it)
-                if (result != null)
-                    return result.groups[1]?.value?.toContentType() ?: Content.NONE
-            }
-            return Content.NONE
-    }
+//    private val List<String>.getContentType: Content
+//        get() {
+//            this.forEach {
+//                val result = "Content-Type: (.*)".toRegex().find(it)
+//                if (result != null)
+//                    return result.groups[1]?.value?.toContentType() ?: Content.NONE
+//            }
+//            return Content.NONE
+//    }
 
     private fun String.toContentType(): Content {
         for (contentType in Content.values())
@@ -138,10 +139,7 @@ class Klask {
             this.handleURLParameter(route)
         } else {
             val (baseURL, queryString) = route.split("?")
-            val currentExchange = this.handleURLParameter(baseURL)
-            for (query in queryString.split("&"))
-                currentExchange?.request?.args?.set(query.substringBefore("="), query.substringAfter("=")) ?: return null
-            currentExchange
+            this.handleURLParameter(baseURL)?.handleQueryParameter(queryString) ?: return null
         }
     }
 
@@ -168,6 +166,12 @@ class Klask {
             return v
         }
         return null
+    }
+
+    private fun HttpExchange.handleQueryParameter(queryString: String): HttpExchange {
+        for (query in queryString.split("&"))
+            this.request.args[query.substringBefore("=")] = query.substringAfter("=")
+        return this
     }
 
     // *************************** Returning Responses ***************************

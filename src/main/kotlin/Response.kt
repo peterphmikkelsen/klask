@@ -15,7 +15,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
 
     fun renderTemplate(fileName: String): Response {
         val file = File("src/test/kotlin/templates/$fileName") // TODO: Fix hardcoded path
-        if (file.extension != "html") throw IllegalArgumentException("Only HTML files are allowed. Use \"sendFile\" for sending arbitrary files.")
+        if (file.extension != "html") throw IllegalArgumentException("Only HTML files are allowed. Use \"Response.sendFile\" for sending arbitrary files.")
 
         return sendFile(file, Content.HTML)
     }

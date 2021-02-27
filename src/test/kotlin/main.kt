@@ -51,7 +51,7 @@ fun main() {
     }
 
     app.route("/testfile") { _, response ->
-        response.sendFile(File("test/static/myicon.ico"), Content.ICON)
+        response.sendFile(File("src/test/kotlin/static/myicon.ico"), Content.ICON)
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
