@@ -51,6 +51,7 @@ fun main() {
     }
 
     app.route("/testfile") { _, response ->
+        println("Client connected at /testfile")
         response.sendFile(File("src/test/kotlin/static/myicon.ico"), Content.ICON)
     }
 
