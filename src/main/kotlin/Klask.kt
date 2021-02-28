@@ -64,13 +64,12 @@ class Klask {
 
         if (requestData.isEmpty()) return
 
-        // Start processing the request
-        val request = parser.parse(requestData)
-        val httpExchange = routeMappings.getExchange(request.url)
-        
+        // Start parsing the request. The request object is only to access the URL even when
+        val httpExchange = parser.parse(requestData, routeMappings)
+
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("src/test/kotlin/static/${request.url.replace("/", "")}") // TODO: Fix hardcoded path
+            val staticFile = File("src/test/kotlin/static${requestData[0].split(" ")[1]}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
                 writer.sendNotFoundError(); writer.close()
                 return
@@ -79,16 +78,12 @@ class Klask {
             return
         }
 
-        httpExchange.request = request
-        val response = httpExchange.response
-
         // Sending back response
-        val allowedMethods = httpExchange.allowedMethods
-        if (request.method !in allowedMethods)
-            writer.sendMethodNotAllowedError(allowedMethods)
+        if (httpExchange.request.method !in httpExchange.allowedMethods)
+            writer.sendMethodNotAllowedError(httpExchange.allowedMethods)
         else {
-            httpExchange.handler(request, response)
-            writer.sendResponse(response.body)
+            httpExchange.handler(httpExchange.request, httpExchange.response)
+            writer.sendResponse(httpExchange.response.body)
         }
 
         writer.close()
@@ -102,70 +97,6 @@ class Klask {
                     return result.groups[1]?.value?.toInt() ?: 0
             }
             return 0
-    }
-
-//    private val List<String>.getContentType: Content
-//        get() {
-//            this.forEach {
-//                val result = "Content-Type: (.*)".toRegex().find(it)
-//                if (result != null)
-//                    return result.groups[1]?.value?.toContentType() ?: Content.NONE
-//            }
-//            return Content.NONE
-//    }
-
-    private fun String.toContentType(): Content {
-        for (contentType in Content.values())
-            if (contentType.desc == this) return contentType
-        return Content.NONE
-    }
-
-    // Adds URL parameters to the request object (if they are there) and returns the HttpExchange object found
-    private fun MutableMap<String, HttpExchange>.getExchange(route: String): HttpExchange? {
-        val exchange = this[route]
-
-        // If the route has an exact match (e.g. no parameters) just return it
-        if (exchange != null)
-            return exchange
-
-        // Handle potential URL query string
-        return if ("?" !in route) {
-            this.handleURLParameter(route)
-        } else {
-            val (baseURL, queryString) = route.split("?")
-            this.handleURLParameter(baseURL)?.handleQueryParameter(queryString) ?: return null
-        }
-    }
-
-    private fun MutableMap<String, HttpExchange>.handleURLParameter(route: String): HttpExchange? {
-        val paramValues = route.split("/")
-        for ((k, v) in this) {
-            // Don't consider the root URL
-            if (k == "/") continue
-
-            // Make sure we actually match the correct route
-            if (!(k.replace("<.+>".toRegex(), ".+").toRegex().matches(route)))
-                continue
-
-            // Add the parameters to the request object
-            val paramKeys = k.split("/")
-            for (i in paramKeys.indices) {
-                // Ensure only the real parameters (e.g. <...>) are added to the request object
-                if (paramKeys[i] == "" || !(paramKeys[i][0] == '<' && paramKeys[i].last() == '>'))
-                    continue
-
-                val formattedKey = paramKeys[i].replace("[<\$>]".toRegex(), "") // Get rid of the < >
-                v.request.params[formattedKey] = paramValues[i]
-            }
-            return v
-        }
-        return null
-    }
-
-    private fun HttpExchange.handleQueryParameter(queryString: String): HttpExchange {
-        for (query in queryString.split("&"))
-            this.request.args[query.substringBefore("=")] = query.substringAfter("=")
-        return this
     }
 
     // *************************** Returning Responses ***************************
