@@ -1,4 +1,4 @@
-class RequestParser {
+class RequestParser(private val converter: URLConverter) {
 
     // Parses the request data into a Request object and returns the belonging HttpExchange object. TODO: Handle malformed requests
     fun parse(requestData: MutableList<String>, routeMappings: MutableMap<String, HttpExchange>): HttpExchange? {
@@ -11,7 +11,7 @@ class RequestParser {
             routeMappings.handleURLParameters(baseURL)?.handleURLQueries(queryString)
         }
 
-        val request = httpExchange?.request ?: Request()
+        val request = httpExchange?.request ?: return null
 
         request.method = method
         request.url = URL
@@ -53,7 +53,6 @@ class RequestParser {
         if (exchange != null)
             return exchange
 
-        val paramValues = route.split("/")
         for ((k, v) in this) {
             // Don't consider the root URL
             if (k == "/") continue
@@ -63,23 +62,14 @@ class RequestParser {
                 continue
 
             // Add the parameters to the request object
-            val paramKeys = k.split("/")
-            for (i in paramKeys.indices) {
-                // Ensure only the real parameters (e.g. <...>) are added to the request object
-                if (paramKeys[i] == "" || !(paramKeys[i][0] == '<' && paramKeys[i].last() == '>'))
-                    continue
-
-                val formattedKey = paramKeys[i].replace("[<\$>]".toRegex(), "") // Get rid of the < >
-                v.request.params[formattedKey] = paramValues[i]
-            }
+            v.request.params = converter.getURLParameters(k, route)
             return v
         }
         return null
     }
 
     private fun HttpExchange.handleURLQueries(queryString: String): HttpExchange {
-        for (query in queryString.split("&"))
-            this.request.args[query.substringBefore("=")] = query.substringAfter("=")
+        this.request.queries = converter.getURLQueries(queryString)
         return this
     }
 

@@ -11,9 +11,12 @@ import kotlin.system.exitProcess
 class Klask {
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
+    private val parser = RequestParser(BaseURLConverter())
 
-    fun run(host: String = "127.0.0.1", port: Int = 80) {
+    fun run(host: String = "127.0.0.1", port: Int = 80, debug: Boolean = false) {
         server.bind(InetSocketAddress(host, port), 0)
+
+        println("Running Klask Server...")
 
         while (true) {
             try {
@@ -39,9 +42,7 @@ class Klask {
         val reader = clientSocket.getInputStream().bufferedReader()
         val writer = DataOutputStream(clientSocket.getOutputStream())
 
-        val parser = RequestParser()
         val requestData = mutableListOf<String>()
-
         var line = reader.readLine()
         while (line != "" && line != null) {
             requestData.add(line)
