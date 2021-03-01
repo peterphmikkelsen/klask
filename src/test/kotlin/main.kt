@@ -41,12 +41,12 @@ fun main() {
 
     app.route("/testpost", methods = listOf("POST")) { req, res ->
         println("Client connected at /testpost")
-        res.makeResponse("You sent: ${req.body}", Content.PLAIN)
+        res.makeResponse("You sent: ${req.body}\n", Content.PLAIN)
     }
 
     app.route("/testparams/<idx1>/<idx2>") { req, res ->
         println("Client connected at /testparams/${req.params["idx1"]}/${req.params["idx2"]}")
-        println(req.args)
+        println(req.queries)
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
 
