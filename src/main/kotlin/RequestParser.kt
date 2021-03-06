@@ -69,7 +69,7 @@ class RequestParser(private val converter: URLConverter) {
     }
 
     private fun HttpExchange.handleURLQueries(queryString: String): HttpExchange {
-        this.request.queries = converter.getURLQueries(queryString)
+        this.request.queries = getURLQueries(queryString)
         return this
     }
 
@@ -77,5 +77,12 @@ class RequestParser(private val converter: URLConverter) {
         for (contentType in Content.values())
             if (contentType.desc == this) return contentType
         return Content.NONE
+    }
+
+    private fun getURLQueries(queryString: String): MutableMap<String, String> {
+        val queries = mutableMapOf<String, String>()
+        for (query in queryString.split("&"))
+            queries[query.substringBefore("=")] = query.substringAfter("=")
+        return queries
     }
 }

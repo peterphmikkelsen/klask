@@ -1,13 +1,6 @@
 class BaseURLConverter: URLConverter {
 
-    override fun getURLQueries(queryString: String): MutableMap<String, String> {
-        val queries = mutableMapOf<String, String>()
-        for (query in queryString.split("&"))
-            queries[query.substringBefore("=")] = query.substringAfter("=")
-        return queries
-    }
-
-    override fun getURLParameters(savedURL: String, accessedURL: String): MutableMap<String, String> {
+   override fun getURLParameters(savedURL: String, accessedURL: String): MutableMap<String, String> {
         val params = mutableMapOf<String, String>()
         val paramKeys = savedURL.split("/")
         val paramValues = accessedURL.split("/")
