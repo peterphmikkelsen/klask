@@ -54,11 +54,15 @@ app.route("/testpost", methods = listOf("POST")) { req, res ->
 app.route("/testparams/<idx1>/<idx2>") { req, res ->
     res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
 }
-
+```
+## Sending files
+Sending files is super simple. Just use the ".sendFile" function
+```kotlin
 app.route("/testfile") { _, res ->
     res.sendFile(File("myroot/mydir/myfile.txt"), Content.PLAIN)
 }
 ```
+
 ## Redirecting
 Klask is also able to redirect by using the HTTP response "301 Moved Permanently"
 ```kotlin
