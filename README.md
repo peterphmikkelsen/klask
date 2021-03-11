@@ -59,4 +59,15 @@ app.route("/testfile") { _, res ->
     res.sendFile(File("myroot/mydir/myfile.txt"), Content.PLAIN)
 }
 ```
+## Redirecting
+Klask is also able to redirect by using the HTTP response "301 Moved Permanently"
+```kotlin
+app.route("/testredirect") { _, res ->
+    res.redirect("/redirected")
+}
+
+app.route("/redirected") { _, res ->
+    res.makeResponse("Redirected from /testredirect", Content.PLAIN)
+}
+```
 
