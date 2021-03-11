@@ -55,6 +55,14 @@ fun main() {
         response.sendFile(File("src/test/kotlin/static/myicon.ico"), Content.ICON)
     }
 
+    app.route("/testredirect") { _, response ->
+        response.redirect("/redirecttest")
+    }
+
+    app.route("/redirecttest") { _, response ->
+        response.makeResponse("redirected from /testredirect", Content.PLAIN)
+    }
+
     // The server will run with host=localhost and port=80 if no other parameters are given
     app.run()
 }

@@ -63,4 +63,15 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         this.body = sb.toString()
         return this
     }
+
+    fun redirect(redirectEndpoint: String): Response {
+        val sb = StringBuilder()
+        sb.append("HTTP/1.1 ${Status.HTTP_301_MOVED_PERMANENTLY.desc}\n")
+            .append("Location: $redirectEndpoint\r\n\n")
+
+        this.contentType = Content.NONE
+        this.responseCode = Status.HTTP_301_MOVED_PERMANENTLY
+        this.body = sb.toString()
+        return this
+    }
 }
