@@ -55,8 +55,9 @@ app.route("/testparams/<idx1>/<idx2>") { req, res ->
     res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
 }
 ```
+
 ## Sending files
-Sending files is super simple. Just use the ".sendFile" function
+Sending files is super simple. Just use the `Response.sendFile` function
 ```kotlin
 app.route("/testfile") { _, res ->
     res.sendFile(File("myroot/mydir/myfile.pdf"))
@@ -75,3 +76,10 @@ app.route("/redirected") { _, res ->
 }
 ```
 
+## Sending status
+If you want to send only a status code and description
+```kotlin
+app.route("/status") { _, res ->
+    response.sendStatus(Status.HTTP_418_IM_A_TEAPOT) // 418 I'm a teapot
+}
+```
