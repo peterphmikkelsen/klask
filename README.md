@@ -59,7 +59,7 @@ app.route("/testparams/<idx1>/<idx2>") { req, res ->
 Sending files is super simple. Just use the ".sendFile" function
 ```kotlin
 app.route("/testfile") { _, res ->
-    res.sendFile(File("myroot/mydir/myfile.txt"), Content.PLAIN)
+    res.sendFile(File("myroot/mydir/myfile.pdf"))
 }
 ```
 
