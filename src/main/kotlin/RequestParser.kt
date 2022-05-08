@@ -22,7 +22,7 @@ class RequestParser(private val converter: URLConverter) {
 
         request.host = requestData[1].substringAfter(": ")
 
-        for (i in 2 until requestData.size-1) {
+        for (i in 2 until requestData.size) {
             val current = requestData[i]
             val headerName = current.substringBefore(":")
             val headerValue = current.substringAfter(": ")
