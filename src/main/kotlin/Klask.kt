@@ -105,16 +105,7 @@ class Klask {
     private fun DataOutputStream.sendResponse(response: String) = this.writeBytes(response)
 
     private fun DataOutputStream.sendStaticFile(file: File) {
-        val content = when (file.extension) { // TODO: Handling more static file types
-            "js" -> Content.JAVASCRIPT
-            "css" -> Content.CSS
-            "ico" -> Content.ICON
-            "png" -> Content.PNG
-            "txt" -> Content.PLAIN
-            "json" -> Content.JSON
-            else -> throw IllegalArgumentException("File type is not allowed: ${file.extension}")
-        }
-        this.sendResponse(Response().sendFile(file, content).body)
+        this.sendResponse(Response().sendFile(file).body)
     }
 
     private fun DataOutputStream.sendMethodNotAllowedError(allowed: List<String>) {

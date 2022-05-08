@@ -17,7 +17,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         val file = File("src/test/kotlin/templates/$fileName") // TODO: Fix hardcoded path
         if (file.extension != "html") throw IllegalArgumentException("Only HTML files are allowed. Use \"Response.sendFile\" for sending arbitrary files.")
 
-        return sendFile(file, Content.HTML)
+        return sendFile(file)
     }
 
     fun makeResponse(response: String, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
@@ -39,7 +39,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         return this
     }
 
-    fun sendFile(file: File, contentType: Content, responseCode: Status = Status.HTTP_200_OK): Response {
+    fun sendFile(file: File, responseCode: Status = Status.HTTP_200_OK): Response {
         val reader = file.inputStream().buffered()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
@@ -58,7 +58,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         }
         reader.close()
 
-        this.contentType = contentType
+        this.contentType = file.extension.toContentType()
         this.responseCode = responseCode
         this.body = sb.toString()
         return this
@@ -73,5 +73,15 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         this.responseCode = Status.HTTP_301_MOVED_PERMANENTLY
         this.body = sb.toString()
         return this
+    }
+    fun sendStatus(status: Status): Response = makeResponse(status.desc, Content.PLAIN, status)
+
+    private fun String.toContentType(): Content {
+        for (type in Content.values()) {
+            if (type.extension != this)
+                continue
+            return type
+        }
+        return Content.NONE
     }
 }
