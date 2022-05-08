@@ -52,7 +52,7 @@ fun main() {
 
     app.route("/testfile") { _, response ->
         println("Client connected at /testfile")
-        response.sendFile(File("src/test/kotlin/static/myicon.ico"), Content.ICON)
+        response.sendFile(File("src/test/kotlin/static/myicon.ico"))
     }
 
     app.route("/testredirect") { _, response ->
@@ -61,6 +61,14 @@ fun main() {
 
     app.route("/redirecttest") { _, response ->
         response.makeResponse("redirected from /testredirect", Content.PLAIN)
+    }
+
+    app.route("/testpdf") { _, response ->
+        response.sendFile(File("src/test/kotlin/static/testpdf.pdf"))
+    }
+
+    app.route("/teststatus") { _, response ->
+        response.sendStatus(Status.HTTP_418_IM_A_TEAPOT)
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
