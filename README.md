@@ -50,11 +50,24 @@ app.route("/xml") { _, res ->
 app.route("/testpost", methods = listOf("POST")) { req, res ->
     res.makeResponse("You sent: ${req.body}", Content.PLAIN)
 }
+```
 
+## URL Parameters
+It is also possible to add named parameters to the target URL
+```kotlin
 app.route("/testparams/<idx1>/<idx2>") { req, res ->
     res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
 }
 ```
+And you can even use typed parameters!
+```kotlin
+app.route("/testparamstyped/<age:int>") { req, res ->
+    res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
+}
+```
+Here the first example leads to all parameters being strings (at runtime) while the second example ensures correct types (again, at runtime) on all parameters where a type is present.
+
+If any of the types are not correct, the client will receive the message: `400 Bad Request. Parameter-type was specified as $type but you entered "$value"`
 
 ## Sending files
 Sending files is super simple. Just use the `Response.sendFile` function
