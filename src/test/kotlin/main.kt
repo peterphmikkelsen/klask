@@ -54,26 +54,26 @@ fun main() {
         res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
     }
 
-    app.route("/testfile") { _, response ->
+    app.route("/testfile") { _, res ->
         println("Client connected at /testfile")
-        response.headers["Cache-Control"] = "max-age=60, public"
-        response.sendFile(File("src/test/kotlin/static/myicon.ico"))
+        res.headers["Cache-Control"] = "max-age=60, public"
+        res.sendFile(File("src/test/kotlin/static/myicon.ico"))
     }
 
-    app.route("/testredirect") { _, response ->
-        response.redirect("/redirecttest")
+    app.route("/testredirect") { _, res ->
+        res.redirect("/redirecttest")
     }
 
-    app.route("/redirecttest") { _, response ->
-        response.makeResponse("redirected from /testredirect", Content.PLAIN)
+    app.route("/redirecttest") { _, res ->
+        res.makeResponse("redirected from /testredirect", Content.PLAIN)
     }
 
-    app.route("/testpdf") { _, response ->
-        response.sendFile(File("src/test/kotlin/static/testpdf.pdf"))
+    app.route("/testpdf") { _, res ->
+        res.sendFile(File("src/test/kotlin/static/testpdf.pdf"))
     }
 
-    app.route("/teststatus") { _, response ->
-        response.sendStatus(Status.HTTP_418_IM_A_TEAPOT)
+    app.route("/teststatus") { _, res ->
+        res.sendStatus(Status.HTTP_418_IM_A_TEAPOT)
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
