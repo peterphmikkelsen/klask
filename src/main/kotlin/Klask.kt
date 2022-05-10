@@ -65,8 +65,13 @@ class Klask {
 
         if (requestData.isEmpty()) return
 
-        // Start parsing the request. The request object is only to access the URL even when
-        val httpExchange = parser.parse(requestData, routeMappings)
+        // Start parsing the request.
+        val httpExchange = try {
+             parser.parse(requestData, routeMappings)
+        } catch (e: Exception) {
+            writer.sendBadRequestError(e.message); writer.close()
+            return
+        }
 
         // Route is not defined - check static files
         if (httpExchange == null) {
@@ -116,7 +121,10 @@ class Klask {
     }
 
     private fun DataOutputStream.sendNotFoundError() =
-        this.sendResponse("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>404 Not Found</h1>\r\n")
+        this.sendResponse("HTTP/1.1 ${Status.HTTP_404_NOT_FOUND.desc}\n\n<h1>${Status.HTTP_404_NOT_FOUND.desc}</h1>\r\n")
+
+    private fun DataOutputStream.sendBadRequestError(message: String?) =
+        this.sendResponse("HTTP/1.1 ${Status.HTTP_400_BAD_REQUEST.desc}\n\n${Status.HTTP_400_BAD_REQUEST.desc}. $message\n\r")
 
     private class DuplicateRouteException(msg: String): Exception(msg)
 }

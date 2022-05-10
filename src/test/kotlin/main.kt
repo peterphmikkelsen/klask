@@ -50,8 +50,13 @@ fun main() {
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
 
+    app.route("/testparamstyped/<age:int>") { req, res ->
+        res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
+    }
+
     app.route("/testfile") { _, response ->
         println("Client connected at /testfile")
+        response.headers["Cache-Control"] = "max-age=60, public"
         response.sendFile(File("src/test/kotlin/static/myicon.ico"))
     }
 
@@ -72,5 +77,5 @@ fun main() {
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
-    app.run()
+    app.run(port = 3000)
 }

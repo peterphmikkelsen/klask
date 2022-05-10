@@ -7,6 +7,6 @@ class Request(var method: String = "",
               var cookie: String = "",
               var contentType: Content = Content.NONE,
               var body: String = "",
-              var params: MutableMap<String, String> = mutableMapOf(),
+              var params: MutableMap<String, Any> = mutableMapOf(),
               var queries: MutableMap<String, String> = mutableMapOf(),
 )
