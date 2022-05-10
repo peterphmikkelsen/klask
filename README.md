@@ -93,6 +93,6 @@ app.route("/redirected") { _, res ->
 If you want to send only a status code and description
 ```kotlin
 app.route("/status") { _, res ->
-    response.sendStatus(Status.HTTP_418_IM_A_TEAPOT) // 418 I'm a teapot
+    res.sendStatus(Status.HTTP_418_IM_A_TEAPOT) // 418 I'm a teapot
 }
 ```
