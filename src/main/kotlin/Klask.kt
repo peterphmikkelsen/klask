@@ -51,7 +51,7 @@ class Klask {
 
         // In order to read the request body:
         // First finding the Content-Length header
-        val contentLength = requestData.getContentLength
+        val contentLength = requestData.contentLength
 
         // Reading the request body
         val sb = StringBuilder()
@@ -90,7 +90,8 @@ class Klask {
         writer.close()
     }
 
-    private val List<String>.getContentLength: Int
+    // A little unnecessary to use an extension property here - but it looks cool :)
+    private val List<String>.contentLength: Int
         get() {
             this.forEach {
                 val result = "Content-Length: (.*)".toRegex().find(it)

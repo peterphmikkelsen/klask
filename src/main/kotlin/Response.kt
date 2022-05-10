@@ -40,6 +40,8 @@ class Response(private var contentType: Content = Content.NONE, private var resp
     }
 
     fun sendFile(file: File, lastModified: Boolean = true, responseCode: Status = Status.HTTP_200_OK): Response {
+        val contentType = file.extension.toContentType()
+
         val reader = file.inputStream().buffered()
         val sb = StringBuilder()
         sb.append("HTTP/1.1 ${responseCode.desc}\n")
@@ -49,9 +51,9 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         for ((k, v) in headers)
             sb.append("$k: $v\n")
 
+        // Primarily
         if (lastModified)
             sb.append("Last-Modified: ${dateFormat.format(file.lastModified())} GMT\n")
-
 
         sb.append("Date: ${dateFormat.format(Date())} GMT\r\n\n")
 
@@ -62,7 +64,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         }
         reader.close()
 
-        this.contentType = file.extension.toContentType()
+        this.contentType = contentType
         this.responseCode = responseCode
         this.body = sb.toString()
         return this
