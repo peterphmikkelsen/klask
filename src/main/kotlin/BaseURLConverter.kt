@@ -15,7 +15,7 @@ class BaseURLConverter: URLConverter {
             if (formattedKey.contains(":")) {
                 val (name, type) = formattedKey.split(":").map(String::trim)
 
-                val exception = Exception("Parameter-type was specified as $type but you entered ${paramValues[i]}")
+                val exception = Exception("Parameter-type was specified as $type but you entered \"${paramValues[i]}\"")
                 val valueToKotlinType: Any = when (type) {
                     "int" -> {
                         try {

@@ -69,7 +69,12 @@ class Klask {
         val httpExchange = try {
              parser.parse(requestData, routeMappings)
         } catch (e: Exception) {
-            writer.sendBadRequestError(e.message); writer.close()
+            if (e is IndexOutOfBoundsException) {
+                writer.sendBadRequestError("Not enough parameters!")
+            } else {
+                writer.sendBadRequestError(e.message); writer.close()
+            }
+            writer.close()
             return
         }
 
