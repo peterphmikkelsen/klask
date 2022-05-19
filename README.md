@@ -45,10 +45,32 @@ app.route("/xml") { _, res ->
         </root>
     """.trimIndent(), Content.XML)
 }
+```
+
+## POST/PUT and DELETE
+This example shows how to do a simple POST request. Use the `Request.receiveJsonObject<T>` method to automatically take the request-body and decode it into the desired object
+```kotlin
+@kotlinx.serialization.Serializable
+data class Person(val id: String, val firstName: String, val lastName: String, val age: Int)
+
+val people = mutableListOf<Person>()
 
 // This only allows POST requests. Default is GET and POST.
-app.route("/testpost", methods = listOf("POST")) { req, res ->
-    res.makeResponse("You sent: ${req.body}", Content.PLAIN)
+app.route("/postperson", methods = listOf("POST")) { req, res ->
+    val person = req.receiveJsonObject<Person>() // Throws exception if req.method is not POST/PUT or if req.contentType is not JSON
+    people.add(person)
+    res.sendStatus(Status.HTTP_201_CREATED)
+}
+```
+Similarly, you can also do a DELETE request
+```kotlin
+app.route("/deleteperson/<id>", methods = listOf("DELETE")) { req, res ->
+    val id = req.params["id"]
+    if (people.removeIf { it.id == id }) {
+        res.makeResponse("Person successfully removed!", Content.PLAIN, Status.HTTP_202_ACCEPTED)
+    } else {
+        res.sendStatus(Status.HTTP_404_NOT_FOUND)
+    }
 }
 ```
 
@@ -70,7 +92,7 @@ Here the first example leads to all parameters being strings (at runtime) while 
 If any of the types are not correct, the client will receive the message: `400 Bad Request. Parameter-type was specified as $type but you entered "$value"`
 
 ## Sending files
-Sending files is super simple. Just use the `Response.sendFile` function
+Sending files is super simple. Just use the `Response.sendFile` method
 ```kotlin
 app.route("/testfile") { _, res ->
     res.sendFile(File("myroot/mydir/myfile.pdf"))
