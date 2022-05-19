@@ -1,0 +1,64 @@
+GET http://127.0.0.1:3000/
+Accept: text/html
+
+###
+GET http://127.0.0.1:3000/plain
+Accept: text/plain
+
+###
+GET http://127.0.0.1:3000/json
+Accept: application/json
+
+###
+GET http://127.0.0.1:3000/xml
+Accept: application/xml
+
+###
+GET http://127.0.0.1:3000/urlenc
+Accept: application/x-www-form-urlencoded
+
+###
+GET http://127.0.0.1:3000/testparams/7/12
+Accept: text/html
+
+###
+GET http://127.0.0.1:3000/testparamstyped/12
+Accept: text/html
+
+###
+GET http://127.0.0.1:3000/testparamstyped/fail
+Accept: text/html
+
+###
+GET http://127.0.0.1:3000/testfile
+Accept: image/x-icon
+
+###
+GET http://127.0.0.1:3000/testredirect
+Accept: text/plain
+
+###
+GET http://127.0.0.1:3000/testpdf
+Accept: application/pdf
+
+###
+GET http://127.0.0.1:3000/teststatus
+Accept: text/plain
+
+###
+POST http://127.0.0.1:3000/testpost
+Content-Type: text/plain
+
+{
+  "id": "0",
+  "firstName": "Peter",
+  "lastName": "Mikkelsen",
+  "age": 25,
+  "sdkjfs": "kfjsdlf"
+}
+
+###
+DELETE http://127.0.0.1:3000/testdelete/0
+
+###
+DELETE http://127.0.0.1:3000/testdelete/101
