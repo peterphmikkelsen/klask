@@ -1,3 +1,4 @@
+import kotlinx.serialization.Serializable
 import java.io.File
 
 fun main() {
@@ -39,14 +40,8 @@ fun main() {
         res.makeResponse("username=peter&favorite%color=blue", Content.URLEncoded)
     }
 
-    app.route("/testpost", methods = listOf("POST")) { req, res ->
-        println("Client connected at /testpost")
-        res.makeResponse("You sent: ${req.body}\n", Content.PLAIN)
-    }
-
     app.route("/testparams/<idx1>/<idx2>") { req, res ->
         println("Client connected at /testparams/${req.params["idx1"]}/${req.params["idx2"]}")
-        println(req.queries)
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
 
@@ -76,6 +71,30 @@ fun main() {
         res.sendStatus(Status.HTTP_418_IM_A_TEAPOT)
     }
 
+    // =========== TESTING POST AND DELETE ===========
+
+    val people = mutableListOf<Person>()
+    app.route("/testpost", methods = listOf("POST")) { req, res ->
+        println("Client connected at /testpost")
+        val person = req.receiveJsonObject<Person>() // Throws exception if req.contentType is not JSON
+        people.add(person)
+        println(people)
+        res.sendStatus(Status.HTTP_201_CREATED)
+    }
+
+    app.route("/testdelete/<id>", methods = listOf("DELETE")) { req, res ->
+        val id = req.params["id"]
+        if (people.removeIf { it.id == id }) {
+            println(people)
+            res.makeResponse("Person successfully removed!", Content.PLAIN, Status.HTTP_202_ACCEPTED)
+        } else {
+            res.sendStatus(Status.HTTP_404_NOT_FOUND)
+        }
+    }
+
     // The server will run with host=localhost and port=80 if no other parameters are given
     app.run(port = 3000)
 }
+
+@Serializable
+data class Person(val id: String, val firstName: String, val lastName: String, val age: Int)
