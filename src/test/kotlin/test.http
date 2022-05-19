@@ -47,14 +47,13 @@ Accept: text/plain
 
 ###
 POST http://127.0.0.1:3000/testpost
-Content-Type: text/plain
+Content-Type: application/json
 
 {
   "id": "0",
   "firstName": "Peter",
   "lastName": "Mikkelsen",
-  "age": 25,
-  "sdkjfs": "kfjsdlf"
+  "age": 25
 }
 
 ###
