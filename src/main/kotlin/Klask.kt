@@ -132,4 +132,6 @@ class Klask {
         this.sendResponse("HTTP/1.1 ${Status.HTTP_400_BAD_REQUEST.desc}\n\n${Status.HTTP_400_BAD_REQUEST.desc}. $message\n\r")
 
     private class DuplicateRouteException(msg: String): Exception(msg)
+
+    @PublishedApi internal class JsonDecodeException(msg: String): Exception(msg)
 }
