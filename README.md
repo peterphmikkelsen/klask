@@ -47,6 +47,23 @@ app.route("/xml") { _, res ->
 }
 ```
 
+## URL Parameters
+It is also possible to add named parameters to the target URL
+```kotlin
+app.route("/testparams/<idx1>/<idx2>") { req, res ->
+    res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
+}
+```
+And you can even use typed parameters!
+```kotlin
+app.route("/testparamstyped/<age:int>") { req, res ->
+    res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
+}
+```
+Here the first example leads to all parameters being strings (at runtime) while the second example ensures correct types (again, at runtime) on all parameters where a type is present.
+
+If any of the types are not correct, the client will receive the message: `400 Bad Request. Parameter-type was specified as $type but you entered "$value"`
+
 ## POST/PUT and DELETE
 This example shows how to do a simple POST request. Use the `Request.receiveJsonObject<T>` method to automatically take the request-body and decode it into the desired object
 ```kotlin
@@ -73,23 +90,6 @@ app.route("/deleteperson/<id>", methods = listOf("DELETE")) { req, res ->
     }
 }
 ```
-
-## URL Parameters
-It is also possible to add named parameters to the target URL
-```kotlin
-app.route("/testparams/<idx1>/<idx2>") { req, res ->
-    res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
-}
-```
-And you can even use typed parameters!
-```kotlin
-app.route("/testparamstyped/<age:int>") { req, res ->
-    res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
-}
-```
-Here the first example leads to all parameters being strings (at runtime) while the second example ensures correct types (again, at runtime) on all parameters where a type is present.
-
-If any of the types are not correct, the client will receive the message: `400 Bad Request. Parameter-type was specified as $type but you entered "$value"`
 
 ## Sending files
 Sending files is super simple. Just use the `Response.sendFile` method
