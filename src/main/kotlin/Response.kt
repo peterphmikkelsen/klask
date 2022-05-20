@@ -1,3 +1,5 @@
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -68,6 +70,12 @@ class Response(private var contentType: Content = Content.NONE, private var resp
         this.responseCode = responseCode
         this.body = sb.toString()
         return this
+    }
+
+    fun sendJson(payload: String): Response = makeResponse(payload, Content.JSON)
+
+    inline fun <reified T> sendJson(payload: T): Response {
+        return makeResponse(Json.encodeToString(payload), Content.JSON)
     }
 
     fun redirect(redirectEndpoint: String): Response {
