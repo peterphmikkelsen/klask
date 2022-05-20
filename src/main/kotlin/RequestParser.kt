@@ -57,6 +57,10 @@ class RequestParser(private val converter: URLConverter) {
             // Don't consider the root URL
             if (k == "/") continue
 
+            // Ensure we only match routes with the same lengths (i.e. don't match /a/<b> to /a/b/c)
+            if (k.count { it == '/' } != route.count { it == '/' })
+                continue
+
             // Make sure we actually match the correct route
             if (!(k.replace("<.+>".toRegex(), ".+").toRegex().matches(route)))
                 continue
