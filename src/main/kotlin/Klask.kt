@@ -38,6 +38,8 @@ class Klask {
         routeMappings[route] = HttpExchange(Request(), Response(), methods, endpointHandler)
     }
 
+    fun setRoutes(routeFunction: Klask.() -> Unit) = routeFunction()
+
     private fun handleIncomingClient(clientSocket: Socket) {
         val reader = clientSocket.getInputStream().bufferedReader()
         val writer = DataOutputStream(clientSocket.getOutputStream())
@@ -72,7 +74,7 @@ class Klask {
             if (e is IndexOutOfBoundsException) {
                 writer.sendBadRequestError("Not enough parameters!")
             } else {
-                writer.sendBadRequestError(e.message); writer.close()
+                writer.sendBadRequestError(e.message)
             }
             writer.close()
             return

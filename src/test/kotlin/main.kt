@@ -22,7 +22,7 @@ fun main() {
 
     app.route("/json") { _, res ->
         println("Client connected at /json")
-        res.makeResponse("""{"hello":"world!"}""", Content.JSON)
+        res.sendJson("""{"hello":"world!"}""")
     }
 
     app.route("/xml") { _, res ->
@@ -76,7 +76,7 @@ fun main() {
     val people = mutableListOf<Person>()
     app.route("/testpost", methods = listOf("POST")) { req, res ->
         println("Client connected at /testpost")
-        val person = req.receiveJsonObject<Person>() // Throws exception if req.contentType is not JSON
+        val person = req.receiveJsonObject<Person>() // Throws exception if req.method is not POST/PUT or if req.contentType is not JSON
         people.add(person)
         println(people)
         res.sendStatus(Status.HTTP_201_CREATED)
@@ -90,6 +90,14 @@ fun main() {
         } else {
             res.sendStatus(Status.HTTP_404_NOT_FOUND)
         }
+    }
+
+    // =========== ALTERNATIVE WAY TO DO ROUTES ===========
+
+    app.setRoutes {
+        getOrderRoutes()
+        addOrderRoute()
+        deleteOrderRoute()
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given

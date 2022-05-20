@@ -61,3 +61,25 @@ DELETE http://127.0.0.1:3000/testdelete/0
 
 ###
 DELETE http://127.0.0.1:3000/testdelete/101
+
+###
+POST http://127.0.0.1:3000/orders/add
+Content-Type: application/json
+
+{
+  "id": "100",
+  "name": "hammer",
+  "price": 10.2,
+  "date": "20/05/22"
+}
+
+###
+GET http://127.0.0.1:3000/orders
+Accept: application/json
+
+###
+GET http://127.0.0.1:3000/orders/100
+Accept: application/json
+
+###
+DELETE http://127.0.0.1:3000/orders/delete/100
