@@ -34,7 +34,7 @@ app.route("/plain") { req, res ->
 
 app.route("/json") { _, res ->
     res.headers["Access-Control-Allow-Origin"] = "*" // Control the response headers
-    res.makeResponse("""{"hello":"world!"}""", Content.JSON)
+    res.sendJson("""{"hello":"world!"}""")
 }
 
 app.route("/xml") { _, res ->
