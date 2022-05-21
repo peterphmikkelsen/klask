@@ -74,6 +74,7 @@ class Response(private var contentType: Content = Content.NONE, private var resp
 
     fun sendJson(payload: String): Response = makeResponse(payload, Content.JSON)
 
+    // reified makes the compiler use the actual type at runtime - myVar is T => myVar is String (if the type was string at runtime)
     inline fun <reified T> sendJson(payload: T): Response {
         return makeResponse(Json.encodeToString(payload), Content.JSON)
     }
