@@ -2,17 +2,21 @@ import kotlinx.serialization.Serializable
 
 val orders = mutableListOf<Order>()
 
-fun Klask.getOrderRoutes() {
+fun Klask.getOrDeleteOrderRoutes() {
     route("/orders") { _, res ->
         res.sendJson(orders)
     }
 
-    route("/orders/<id>") { req, res ->
-        println("HERE")
+    route("/orders/<id>", methods = listOf("GET", "DELETE")) { req, res ->
         val id = req.params["id"]
-        val order = orders.find { it.id == id }
-        if (order != null) {
-            res.sendJson(order)
+        val orderIdx = orders.indices.find { orders[it].id == id }
+        if (orderIdx != null) {
+            if (req.method == "GET") {
+                res.sendJson(orders[orderIdx])
+            } else {
+                orders.removeAt(orderIdx)
+                res.makeResponse("Successfully deleted order!", Content.PLAIN, Status.HTTP_202_ACCEPTED)
+            }
         } else {
             res.sendStatus(Status.HTTP_404_NOT_FOUND)
         }
@@ -25,17 +29,6 @@ fun Klask.addOrderRoute() {
        orders.add(order)
        res.sendStatus(Status.HTTP_201_CREATED)
    }
-}
-
-fun Klask.deleteOrderRoute() {
-    route("/orders/delete/<id>", methods = listOf("DELETE")) { req, res ->
-        val id = req.params["id"]
-        if (orders.removeIf { it.id == id }) {
-            res.makeResponse("Successfully deleted order!", Content.PLAIN, Status.HTTP_202_ACCEPTED)
-        } else {
-            res.sendStatus(Status.HTTP_404_NOT_FOUND)
-        }
-    }
 }
 
 @Serializable

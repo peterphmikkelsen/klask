@@ -95,9 +95,8 @@ fun main() {
     // =========== ALTERNATIVE WAY TO DO ROUTES ===========
 
     app.setRoutes {
-        getOrderRoutes()
+        getOrDeleteOrderRoutes()
         addOrderRoute()
-        deleteOrderRoute()
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
