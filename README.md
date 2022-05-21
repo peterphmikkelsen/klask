@@ -139,9 +139,15 @@ If you wish to keep your routes separate it is also possible to add routes using
 // OrderRoutes.kt
 val orders = mutableListOf<Order>()
 
-fun Klask.getOrderRoute() {
-    route("/orders") { _, res ->
-        res.sendJson(orders)
+fun Klask.orderRoutes() {
+    route("/orders") { req, res ->
+        if (req.method == "GET") {
+            res.sendJson(orders)
+        } else {
+            val order = req.receiveJsonObject<Order>()
+            orders.add(order)
+            res.sendStatus(Status.HTTP_201_CREATED)
+        }
     }
     
     route("/orders/<id>", methods = listOf("GET", "DELETE")) { req, res ->

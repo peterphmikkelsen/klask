@@ -63,7 +63,7 @@ DELETE http://127.0.0.1:3000/testdelete/0
 DELETE http://127.0.0.1:3000/testdelete/101
 
 ###
-POST http://127.0.0.1:3000/orders/add
+POST http://127.0.0.1:3000/orders
 Content-Type: application/json
 
 {
