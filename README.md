@@ -59,6 +59,10 @@ app.route("/xml") { _, res ->
         </root>
     """.trimIndent(), Content.XML)
 }
+
+app.route("/urlenc") { _, res ->
+    res.makeResponse("username=peter&favorite%color=blue", Content.URLEncoded)
+}
 ```
 
 ## URL Parameters
