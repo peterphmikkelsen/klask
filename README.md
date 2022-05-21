@@ -171,7 +171,6 @@ And then add them to the main file
 val app = Klask()
 
 app.setRoutes {
-    getOrderRoute()
-    addOrderRoute()
+    orderRoutes()
 }
 ```
