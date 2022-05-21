@@ -165,14 +165,6 @@ fun Klask.orderRoutes() {
         }
     }
 }
-
-fun Klask.addOrderRoute() {
-   route("/orders/add", methods = listOf("POST")) { req, res ->
-       val order = req.receiveJsonObject<Order>()
-       orders.add(order)
-       res.sendStatus(Status.HTTP_201_CREATED)
-   }
-}
 ```
 And then add them to the main file
 ```kotlin
