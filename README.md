@@ -144,11 +144,16 @@ fun Klask.getOrderRoute() {
         res.sendJson(orders)
     }
     
-    route("/orders/<id>") { req, res ->
+    route("/orders/<id>", methods = listOf("GET", "DELETE")) { req, res ->
         val id = req.params["id"]
-        val order = orders.find { it.id == id }
-        if (order != null) {
-            res.sendJson(order)
+        val orderIdx = orders.indices.find { orders[it].id == id }
+        if (orderIdx != null) {
+            if (req.method == "GET") {
+                res.sendJson(orders[orderIdx])
+            } else {
+                orders.removeAt(orderIdx)
+                res.makeResponse("Successfully deleted order!", Content.PLAIN, Status.HTTP_202_ACCEPTED)
+            }
         } else {
             res.sendStatus(Status.HTTP_404_NOT_FOUND)
         }
