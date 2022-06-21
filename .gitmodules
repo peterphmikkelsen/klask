@@ -1,3 +1,3 @@
 [submodule "kotlin-xml-parser"]
-	path = kotlin-xml-parser/src/main
+	path = kotlin-xml-parser
 	url = https://github.com/peterphmikkelsen/kotlin-xml-parser.git
