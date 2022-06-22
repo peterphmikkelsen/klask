@@ -31,7 +31,8 @@ class Klask {
                     handleIncomingClient(clientSocket, debug)
                 }
             } catch (e: IOException) {
-                if (debug) logger.error(e) { "There was an error serving the client." }
+                if (debug) logger.error { "There was an error serving the client --> ${e.message}" }
+                System.gc()
                 exitProcess(1)
             }
         }
@@ -52,7 +53,7 @@ class Klask {
         val writer = DataOutputStream(clientSocket.getOutputStream())
 
         if (debug) {
-            println("Incoming client!")
+            println("Incoming client.")
             logger.info { "Incoming client --> local address: ${clientSocket.localAddress}; local port: ${clientSocket.localPort}; remote socket-address: ${clientSocket.remoteSocketAddress}" }
         }
 
