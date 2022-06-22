@@ -1,7 +1,7 @@
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 
-class Request(var method: String = "",
+data class Request(var method: String = "",
               var protocol: String = "",
               var protocolVersion: String = "",
               var url: String = "",

@@ -13,6 +13,8 @@ version = "1.0-SNAPSHOT"
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("io.github.microutils:kotlin-logging-jvm:2.1.23")
+    implementation("org.slf4j:slf4j-log4j12:1.7.36")
 }
 
 repositories {

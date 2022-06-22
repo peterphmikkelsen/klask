@@ -7,7 +7,9 @@ import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import kotlin.system.exitProcess
+import mu.KotlinLogging
 
+private val logger = KotlinLogging.logger {}
 class Klask {
     private val server = ServerSocket()
     private val routeMappings = mutableMapOf<String, HttpExchange>()
@@ -16,17 +18,19 @@ class Klask {
     fun run(host: String = "127.0.0.1", port: Int = 80, debug: Boolean = false) {
         server.bind(InetSocketAddress(host, port), 0)
 
-        println("Running Klask Server...")
+        if (debug) {
+            println("Running Klask server @ $host:$port")
+            logger.info { "Application successfully started @ $host:$port" }
+        }
 
         while (true) {
             try {
                 val clientSocket = server.accept()
                 GlobalScope.launch {
-                    handleIncomingClient(clientSocket)
+                    handleIncomingClient(clientSocket, debug)
                 }
             } catch (e: IOException) {
-                println("Error serving the client:")
-                println(e)
+                if (debug) logger.error(e) { "There was an error serving the client." }
                 exitProcess(1)
             }
         }
@@ -40,9 +44,17 @@ class Klask {
 
     fun setRoutes(routeFunction: Klask.() -> Unit) = routeFunction()
 
-    private fun handleIncomingClient(clientSocket: Socket) {
+    private fun handleIncomingClient(clientSocket: Socket, debug: Boolean) {
         val reader = clientSocket.getInputStream().bufferedReader()
         val writer = DataOutputStream(clientSocket.getOutputStream())
+
+        if (debug) {
+            println("Incoming client!")
+            logger.info { "Incoming client -->" }
+            logger.info { "local address: ${clientSocket.localAddress}" }
+            logger.info { "local port: ${clientSocket.localPort}" }
+            logger.info { "remote socket-address: ${clientSocket.remoteSocketAddress}" }
+        }
 
         val requestData = mutableListOf<String>()
         var line = reader.readLine()
@@ -65,15 +77,23 @@ class Klask {
         if (requestData.last() == "")
             requestData.removeLast()
 
-        if (requestData.isEmpty()) return
+        if (requestData.isEmpty()) {
+            if (debug) logger.error { "Request data is empty." }
+            return
+        }
 
         // Start parsing the request.
         val httpExchange = try {
              parser.parse(requestData, routeMappings)
         } catch (e: Exception) {
             if (e is IndexOutOfBoundsException) {
+                if (debug) logger.error(e) { "Not enough parameters were given by the client." }
                 writer.sendBadRequestError("Not enough parameters!")
             } else {
+                if (debug) {
+                    logger.error(e) { "Error in parsing the request." }
+                    logger.error { "Request data: $requestData" }
+                }
                 writer.sendBadRequestError(e.message)
             }
             writer.close()
@@ -85,6 +105,7 @@ class Klask {
             val staticFile = File("src/test/kotlin/static${requestData[0].split(" ")[1]}") // TODO: Fix hardcoded path
             if (!staticFile.exists()) {
                 writer.sendNotFoundError(); writer.close()
+                if (debug) logger.error { "Static file does not exist at path: src/test/kotlin/static${requestData[0].split(" ")[1]}" }
                 return
             }
             writer.sendStaticFile(staticFile); writer.close()
@@ -92,9 +113,10 @@ class Klask {
         }
 
         // Sending back response
-        if (httpExchange.request.method !in httpExchange.allowedMethods)
+        if (httpExchange.request.method !in httpExchange.allowedMethods) {
             writer.sendMethodNotAllowedError(httpExchange.allowedMethods)
-        else {
+            if (debug) logger.info { "Client sent a request with a method that was not allowed: ${httpExchange.request.method}" }
+        } else {
             httpExchange.handler(httpExchange.request, httpExchange.response)
             writer.sendResponse(httpExchange.response.body)
         }
