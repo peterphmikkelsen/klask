@@ -1,4 +1,4 @@
-class RequestParser(private val converter: URLConverter) {
+class RequestParser(private val converter: BaseURLConverter) {
 
     // Parses the request data into a Request object and returns the belonging HttpExchange object. TODO: Handle malformed requests
     fun parse(requestData: MutableList<String>, routeMappings: MutableMap<String, HttpExchange>): HttpExchange? {

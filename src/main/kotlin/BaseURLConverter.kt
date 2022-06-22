@@ -1,6 +1,6 @@
-class BaseURLConverter: URLConverter {
+class BaseURLConverter {
 
-   override fun getURLParameters(savedURL: String, accessedURL: String): MutableMap<String, Any> {
+   fun getURLParameters(savedURL: String, accessedURL: String): MutableMap<String, Any> {
         val params = mutableMapOf<String, Any>()
         val paramKeys = savedURL.split("/")
         val paramValues = accessedURL.split("/")
