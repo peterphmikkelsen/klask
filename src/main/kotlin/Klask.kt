@@ -27,6 +27,7 @@ class Klask {
             try {
                 val clientSocket = server.accept()
                 GlobalScope.launch {
+                    if (debug) logger.info { "Launching new coroutine for client." }
                     handleIncomingClient(clientSocket, debug)
                 }
             } catch (e: IOException) {
