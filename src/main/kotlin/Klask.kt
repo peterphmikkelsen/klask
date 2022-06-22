@@ -51,10 +51,7 @@ class Klask {
 
         if (debug) {
             println("Incoming client!")
-            logger.info { "Incoming client -->" }
-            logger.info { "local address: ${clientSocket.localAddress}" }
-            logger.info { "local port: ${clientSocket.localPort}" }
-            logger.info { "remote socket-address: ${clientSocket.remoteSocketAddress}" }
+            logger.info { "Incoming client --> local address: ${clientSocket.localAddress}; local port: ${clientSocket.localPort}; remote socket-address: ${clientSocket.remoteSocketAddress}" }
         }
 
         val requestData = mutableListOf<String>()
@@ -85,7 +82,7 @@ class Klask {
 
         // Start parsing the request.
         val httpExchange = try {
-            if (debug) logger.info { "Parsing the request." }
+            if (debug) logger.info { "Parsing the request --> $requestData" }
             parser.parse(requestData, routeMappings)
         } catch (e: Exception) {
             if (e is IndexOutOfBoundsException) {
@@ -93,7 +90,7 @@ class Klask {
                 writer.sendBadRequestError("Not enough parameters!")
             } else {
                 if (debug) {
-                    logger.error(e) { "Error in parsing the request." }
+                    logger.error { "Error in parsing the request --> ${e.message}" }
                     logger.error { "Request data: $requestData" }
                 }
                 writer.sendBadRequestError(e.message)

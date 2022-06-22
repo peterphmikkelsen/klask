@@ -99,7 +99,7 @@ fun main() {
     }
 
     // The server will run with host=localhost and port=80 if no other parameters are given
-    app.run(port = 3000)
+    app.run(port = 3000, debug = true)
 }
 
 @Serializable
