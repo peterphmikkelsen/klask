@@ -78,13 +78,14 @@ class Klask {
             requestData.removeLast()
 
         if (requestData.isEmpty()) {
-            if (debug) logger.error { "Request data is empty." }
+            if (debug) logger.error { "Request data from client is empty." }
             return
         }
 
         // Start parsing the request.
         val httpExchange = try {
-             parser.parse(requestData, routeMappings)
+            if (debug) logger.info { "Parsing the request." }
+            parser.parse(requestData, routeMappings)
         } catch (e: Exception) {
             if (e is IndexOutOfBoundsException) {
                 if (debug) logger.error(e) { "Not enough parameters were given by the client." }
@@ -102,20 +103,22 @@ class Klask {
 
         // Route is not defined - check static files
         if (httpExchange == null) {
-            val staticFile = File("src/test/kotlin/static${requestData[0].split(" ")[1]}") // TODO: Fix hardcoded path
+            val fileName = requestData[0].split(" ")[1] // TODO: Fix hardcoded path
+            val staticFile = File("src/test/kotlin/static/$fileName")
             if (!staticFile.exists()) {
                 writer.sendNotFoundError(); writer.close()
-                if (debug) logger.error { "Static file does not exist at path: src/test/kotlin/static${requestData[0].split(" ")[1]}" }
+                if (debug) logger.error { "Static file does not exist at path: src/test/kotlin/static/$fileName" }
                 return
             }
+            if (debug) logger.info { "Serving static file $fileName to client." }
             writer.sendStaticFile(staticFile); writer.close()
             return
         }
 
         // Sending back response
         if (httpExchange.request.method !in httpExchange.allowedMethods) {
-            writer.sendMethodNotAllowedError(httpExchange.allowedMethods)
             if (debug) logger.info { "Client sent a request with a method that was not allowed: ${httpExchange.request.method}" }
+            writer.sendMethodNotAllowedError(httpExchange.allowedMethods)
         } else {
             httpExchange.handler(httpExchange.request, httpExchange.response)
             writer.sendResponse(httpExchange.response.body)
