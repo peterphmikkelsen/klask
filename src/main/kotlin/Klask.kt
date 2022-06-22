@@ -38,7 +38,9 @@ class Klask {
     }
 
     fun route(route: String, methods: List<String> = listOf("GET", "POST"), endpointHandler: (Request, Response) -> Unit) {
-        if (routeMappings[route] != null)
+        val modifiedRoute = route.removeRouteParamNames()
+        val duplicateRouteCheck = routeMappings.keys.any { modifiedRoute == it.removeRouteParamNames() }
+        if (duplicateRouteCheck)
             throw DuplicateRouteException("Routes must be unique: $route is already defined.")
         routeMappings[route] = HttpExchange(Request(), Response(), methods, endpointHandler)
     }
@@ -134,6 +136,10 @@ class Klask {
                     return result.groups[1]?.value?.toInt() ?: 0
             }
             return 0
+    }
+
+    private fun String.removeRouteParamNames(): String {
+        return this.replace("<([^>]+)>".toRegex(), "<>")
     }
 
     // *************************** Returning Responses ***************************

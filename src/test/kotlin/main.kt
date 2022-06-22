@@ -16,9 +16,9 @@ fun main() {
     }
 
     // Throws custom DuplicateRouteException
-    /*app.route("/plain") { _, res ->
-        res.makeResponse("Hello World!", Content.PLAIN)
-    }*/
+//    app.route("/plain") { _, res ->
+//        res.makeResponse("Hello World!", Content.PLAIN)
+//    }
 
     app.route("/json") { _, res ->
         println("Client connected at /json")
@@ -44,6 +44,10 @@ fun main() {
         println("Client connected at /testparams/${req.params["idx1"]}/${req.params["idx2"]}")
         res.makeResponse("<p>You wrote <b>${req.params["idx1"]}</b> and <b>${req.params["idx2"]}</b> as parameters!</p>", Content.HTML)
     }
+
+    // This SHOULD throw a DuplicateRouteException
+//    app.route("/testparams/<a>/<b>") { _, _ ->
+//    }
 
     app.route("/testparamstyped/<age:int>") { req, res ->
         res.makeResponse("<p><b>age = ${req.params["age"]}</b> of type <b>${req.params["age"]!!::class.simpleName}</b></p>", Content.HTML)
