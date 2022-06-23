@@ -178,3 +178,14 @@ app.setRoutes {
     orderRoutes()
 }
 ```
+
+## Debugging
+It is also possible to enable debug-mode, like so
+```kotlin
+val app = Klask()
+
+// ...
+
+app.run(debug = true)
+```
+This will enable logging and various prints to the console. For the logging, a file - `klask.log` - will be created, which will contain details about the running application.
