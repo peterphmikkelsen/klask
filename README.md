@@ -1,6 +1,7 @@
 # Klask
 
 Kotlin version of Flask.
+[![Pure Kotlin](https://img.shields.io/badge/100%25-kotlin-purple.svg)](https://kotlinlang.org/)
 
 ## Built With
 
